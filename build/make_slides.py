@@ -47,12 +47,19 @@ html,body{margin:0;width:1920px;height:1080px;background:#F3F7FB;color:#1B2734;p
   justify-content:space-between;padding:0 64px;font-size:30px}
 .top .t{font-weight:700;font-size:38px}
 .top .k{opacity:.85;font-variant-numeric:tabular-nums;direction:ltr}
-.stage{position:absolute;top:120px;right:64px;left:64px;bottom:200px;display:flex;align-items:center;justify-content:center}
+.stage{position:absolute;top:120px;right:64px;left:64px;bottom:230px;display:flex;align-items:center;justify-content:center}
 .frame{max-width:100%;max-height:100%;background:#fff;border:1px solid #D3DEE9;border-radius:12px;
   box-shadow:0 12px 40px rgba(27,39,52,.14);overflow:hidden}
-.frame img{display:block;max-width:1792px;max-height:760px;width:auto;height:auto}
+.frame img{display:block;max-width:1792px;max-height:730px;width:auto;height:auto}
+.shot{position:relative;display:inline-block;line-height:0}
+.shot.fill{width:1792px}
+.shot.fill img{width:100%;max-width:none;height:auto}
+.hl{position:absolute;border:6px solid #E0261F;border-radius:10px;box-shadow:0 0 0 4px rgba(224,38,31,.18),0 0 24px rgba(224,38,31,.35)}
 .cap{position:absolute;right:64px;left:64px;bottom:56px;min-height:110px;background:#1B2734;color:#fff;border-radius:12px;
-  padding:22px 40px;font-size:38px;line-height:1.4;display:flex;align-items:center}
+  padding:22px 40px;font-size:38px;line-height:1.4;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.cap .ct{font-weight:700;font-size:34px;color:#BFD7F0}
+.cap .bul{display:flex;gap:18px;align-items:flex-start}
+.cap .bul::before{content:'•';color:#BFD7F0;flex:none}
 .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;padding:0 200px;text-align:center}
 .center img{height:150px}
 .center h1{font-family:'Frank Ruhl Libre','DejaVu Serif',serif;font-size:96px;margin:0;color:#1B4F8A;line-height:1.15}
@@ -77,10 +84,16 @@ def render(scene, total):
         body = f"<div class='top'><span class='t'>{html.escape(scene['title'])}</span>{k}</div><div class='pts'>{pts}</div>"
     else:
         src = data_uri(scene['img'], scene.get('crop'))
-        img = f"<img src='{src}' alt=''>"
+        hl = scene.get('highlight')
+        hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+        fill = ' fill' if scene.get('fill') else ''
+        img = f"<div class='shot{fill}'><img src='{src}' alt=''>{hl_div}</div>"
+        cap = html.escape(scene['cap'])
+        cap = (f"<div class='ct'>{html.escape(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
+               if scene.get('cap_title') else cap)
         body = (f"<div class='top'><span class='t'>{html.escape(scene['title'])}</span>{k}</div>"
                 f"<div class='stage'><div class='frame'>{img}</div></div>"
-                f"<div class='cap'>{html.escape(scene['cap'])}</div>")
+                f"<div class='cap'>{cap}</div>")
     hpath = os.path.join(SLIDES, f"{n:02d}.html")
     ppath = os.path.join(SLIDES, f"{n:02d}.png")
     with open(hpath, 'w', encoding='utf-8') as f:
@@ -104,7 +117,8 @@ def srt_time(s):
 scenes = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
 total = len(scenes)
 concat, srt, t = [], [], 0.0
-for s in scenes:
+for idx, s in enumerate(scenes):
+    s['n'] = idx + 1
     p = render(s, total)
     print('rendered', os.path.basename(p))
     concat.append(f"file '{p}'\nduration {s['dur']}")

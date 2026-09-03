@@ -18,7 +18,7 @@
 
 - **מדריך לאתר:** `guide/dist/index.html`
 - **טיוטת סרטון (אנימטיק, ללא קול, כתוביות צרובות):** `build/out/mazpen-guide-draft.mp4`
-- **13 שקופיות 1920×1080 לשליחה כסדרת תמונות:** `build/out/slides/`
+- **17 שקופיות 1920×1080 לשליחה כסדרת תמונות:** `build/out/slides/`
 - **כתוביות לסרטון:** `build/out/subtitles.srt`
 - **קריינות להקלטה:** בתוך `video/script.md`
 
