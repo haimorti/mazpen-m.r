@@ -1,0 +1,3 @@
+build/out/concat.txt
+build/out/slides/*.html
+.DS_Store

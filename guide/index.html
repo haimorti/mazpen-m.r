@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מצפן הזכויות שלי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ground:#F3F7FB;
+  --surface:#FFFFFF;
+  --surface-2:#E9F1F9;
+  --ink:#1B2734;
+  --ink-2:#4F6073;
+  --line:#D3DEE9;
+  --accent:#1B4F8A;
+  --accent-ink:#FFFFFF;
+  --accent-soft:#DCEAF8;
+  --note-bg:#FFF6E5;
+  --note-line:#E7B95C;
+  --note-ink:#5A4300;
+  --st-active:#1F6E43;      --st-active-bg:#E3F3E9;
+  --st-ended:#4E5F72;       --st-ended-bg:#E8EEF4;
+  --st-rejected:#A8281F;    --st-rejected-bg:#FBE8E6;
+  --st-potential:#5E3A94;   --st-potential-bg:#EFE8F8;
+  --st-progress:#8A5B00;    --st-progress-bg:#FFF1CF;
+  --shadow:0 1px 2px rgba(27,39,52,.06),0 8px 24px rgba(27,39,52,.08);
+  --font-display:"Frank Ruhl Libre","David","Times New Roman",serif;
+  --font-body:"Heebo","Segoe UI","Arial",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1923; --surface:#172532; --surface-2:#1E2F40;
+    --ink:#E6EDF5; --ink-2:#A6B5C6; --line:#2C3F52;
+    --accent:#7FB3E6; --accent-ink:#0F1923; --accent-soft:#1F3A57;
+    --note-bg:#2C2410; --note-line:#B58A2E; --note-ink:#F2DCA6;
+    --st-active:#8FD3AA; --st-active-bg:#173626;
+    --st-ended:#B7C4D2; --st-ended-bg:#26364A;
+    --st-rejected:#F3A099; --st-rejected-bg:#4A1F1C;
+    --st-potential:#C9B1EC; --st-potential-bg:#33244F;
+    --st-progress:#F0C86B; --st-progress-bg:#3E2F0E;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1923; --surface:#172532; --surface-2:#1E2F40;
+  --ink:#E6EDF5; --ink-2:#A6B5C6; --line:#2C3F52;
+  --accent:#7FB3E6; --accent-ink:#0F1923; --accent-soft:#1F3A57;
+  --note-bg:#2C2410; --note-line:#B58A2E; --note-ink:#F2DCA6;
+  --st-active:#8FD3AA; --st-active-bg:#173626;
+  --st-ended:#B7C4D2; --st-ended-bg:#26364A;
+  --st-rejected:#F3A099; --st-rejected-bg:#4A1F1C;
+  --st-potential:#C9B1EC; --st-potential-bg:#33244F;
+  --st-progress:#F0C86B; --st-progress-bg:#3E2F0E;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.65;text-align:right;direction:rtl}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:clamp(2rem,4.5vw,3.1rem)}
+h2{font-size:clamp(1.55rem,3vw,2.1rem)}
+h3{font-size:1.25rem;font-family:var(--font-body);font-weight:700}
+p{margin:0}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+
+/* header */
+.band{background:var(--accent);color:var(--accent-ink);font-size:.9rem;letter-spacing:.02em}
+.band .in{max-width:1040px;margin:0 auto;padding:.5rem 1.25rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+header.hero{max-width:1040px;margin:0 auto;padding:3rem 1.25rem 2rem;display:grid;gap:1.25rem}
+.eyebrow{color:var(--ink-2);font-size:.95rem;font-weight:500;letter-spacing:.04em}
+.lede{font-size:1.2rem;max-width:42rem;color:var(--ink-2)}
+.hero-note{background:var(--note-bg);border-right:4px solid var(--note-line);color:var(--note-ink);padding:1rem 1.25rem;border-radius:6px;max-width:44rem;font-size:1rem}
+.hero-note strong{display:block;margin-bottom:.25rem}
+
+/* step nav */
+nav.steps{position:sticky;top:0;z-index:5;background:var(--surface);border-block:1px solid var(--line)}
+nav.steps ol{list-style:none;margin:0 auto;padding:.5rem 1.25rem;max-width:1040px;display:flex;gap:.35rem;overflow-x:auto;scrollbar-width:thin}
+nav.steps a{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .8rem;border-radius:999px;text-decoration:none;color:var(--ink-2);white-space:nowrap;font-size:.95rem;font-weight:500}
+nav.steps a:hover{background:var(--surface-2);color:var(--ink)}
+nav.steps a .n{display:inline-grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:700}
+
+/* content */
+main{max-width:1040px;margin:0 auto;padding:1rem 1.25rem 4rem;display:grid;gap:3.5rem}
+section.step{display:grid;gap:1.25rem;scroll-margin-top:4.5rem}
+.step-head{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start}
+.step-head .n{font-family:var(--font-display);font-size:2.6rem;font-weight:700;line-height:1;color:var(--accent);min-width:2.2rem;text-align:center;margin-top:-.15rem}
+.step-head .sub{color:var(--ink-2);margin-top:.35rem;max-width:40rem}
+.prose{max-width:42rem;display:grid;gap:.9rem}
+.prose ul,.prose ol{margin:0;padding-right:1.4rem;display:grid;gap:.4rem}
+.prose li::marker{color:var(--accent);font-weight:700}
+.ui{font-weight:700;color:var(--accent);white-space:nowrap}
+
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+figure img{display:block;width:100%;height:auto;max-width:100%}
+figcaption{padding:.8rem 1.1rem;font-size:.95rem;color:var(--ink-2);border-top:1px solid var(--line);background:var(--surface-2)}
+figcaption b{color:var(--ink)}
+
+.note{background:var(--note-bg);border-right:4px solid var(--note-line);color:var(--note-ink);padding:.9rem 1.1rem;border-radius:6px;max-width:42rem;font-size:1rem}
+.note b{display:block;margin-bottom:.2rem}
+
+/* zones */
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:1rem;counter-reset:z}
+.zone{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;display:grid;gap:.4rem;align-content:start;border-top:5px solid var(--zc,var(--accent))}
+.zone h3{display:flex;gap:.6rem;align-items:baseline}
+.zone h3::before{counter-increment:z;content:counter(z);display:inline-grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:50%;background:var(--zc,var(--accent));color:#fff;font-size:.9rem;flex:none;transform:translateY(-.1rem)}
+.zone p{color:var(--ink-2);font-size:1rem}
+.zone .warn{color:var(--note-ink);background:var(--note-bg);padding:.4rem .6rem;border-radius:4px;font-size:.92rem}
+
+/* statuses */
+.statuses{display:grid;gap:.6rem;max-width:52rem}
+.status{display:grid;grid-template-columns:8.5rem 1fr;gap:1rem;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.9rem 1rem}
+.pill{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .7rem;border-radius:999px;font-weight:700;font-size:.95rem;color:var(--c);background:var(--bg);white-space:nowrap}
+.pill::before{content:"";width:.55rem;height:.55rem;border-radius:50%;background:currentColor}
+.status .what{display:grid;gap:.15rem}
+.status .do{color:var(--ink-2);font-size:.97rem}
+.status .do b{color:var(--ink)}
+@media (max-width:560px){.status{grid-template-columns:1fr}}
+
+/* detail parts */
+.parts{display:grid;gap:.75rem;max-width:42rem}
+.part{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:start}
+.part .ic{width:2.4rem;height:2.4rem;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.part .ic svg{width:1.3rem;height:1.3rem}
+.part h3{margin-bottom:.15rem}
+.part p{color:var(--ink-2);font-size:1rem}
+
+/* meter demo */
+.meter{max-width:42rem;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:1rem 1.1rem;display:grid;gap:.5rem;font-size:.95rem;color:var(--ink-2)}
+.meter .bar{height:.7rem;border-radius:999px;background:var(--line);overflow:hidden}
+.meter .bar i{display:block;height:100%;width:48%;background:var(--accent);border-radius:999px}
+.meter .row{display:flex;justify-content:space-between;gap:1rem}
+.meter b{color:var(--ink)}
+
+/* how-to steps */
+.howto{list-style:none;margin:0;padding:0;display:grid;gap:.6rem;max-width:42rem;counter-reset:h}
+.howto li{display:grid;grid-template-columns:2rem 1fr;gap:.8rem;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.8rem 1rem}
+.howto li::before{counter-increment:h;content:counter(h);display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700}
+
+/* tips */
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1rem}
+.tip{background:var(--surface-2);border-radius:10px;padding:1rem 1.1rem;display:grid;gap:.3rem}
+.tip b{font-size:1.05rem}
+.tip p{color:var(--ink-2);font-size:1rem}
+
+/* faq */
+.faq{display:grid;gap:.5rem;max-width:46rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+summary{cursor:pointer;padding:.85rem 1rem;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:1rem;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.4rem;color:var(--accent);line-height:1;flex:none}
+details[open] summary::after{content:"–"}
+details .a{padding:0 1rem 1rem;color:var(--ink-2);display:grid;gap:.5rem}
+details .a b{color:var(--ink)}
+.faq-group{display:grid;gap:.6rem}
+.faq-group h3{color:var(--ink-2);font-size:1rem;letter-spacing:.04em;margin-top:.5rem}
+
+/* contact */
+.contact{background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:1.75rem 1.5rem;display:grid;gap:.6rem;max-width:46rem}
+.contact h2{color:inherit}
+.contact p{opacity:.92}
+.ph{display:inline-block;background:rgba(255,255,255,.18);border:1px dashed rgba(255,255,255,.6);padding:.1rem .5rem;border-radius:4px}
+:root[data-theme="dark"] .ph,:root:not([data-theme="light"]) .ph{border-color:rgba(15,25,35,.5);background:rgba(15,25,35,.12)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .ph{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.18)}}
+
+footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--ink-2);font-size:.9rem;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="band"><div class="in"><span>הביטוח הלאומי · אגף שיקום</span><span>מדריך למבוטחים · גרסת טיוטה</span></div></div>
+
+<header class="hero">
+  <p class="eyebrow">האזור האישי · חדש</p>
+  <h1>מצפן הזכויות שלי</h1>
+  <p class="lede">מדריך קצר שמסביר איך נכנסים למצפן, מה רואים בו, מה אומר כל סטטוס, ואיך מגישים קבלות להחזר.</p>
+  <div class="hero-note">
+    <strong>חשוב לדעת לפני שמתחילים</strong>
+    המצפן נמצא כעת בשלבי בנייה והרצה, ובשלב זה הוא מיועד להטבות של נפגעי איבה ומשפחות שכולות. אנחנו מוסיפים אליו הטבות חדשות בהדרגה, ולכן ייתכן שהטבה מסוימת עדיין לא מופיעה בו. הזכאות שלכם לא נפגעת מכך.
+  </div>
+</header>
+
+<nav class="steps" aria-label="שלבי המדריך">
+  <ol>
+    <li><a href="#s1"><span class="n">1</span>כניסה</a></li>
+    <li><a href="#s2"><span class="n">2</span>המסך הראשי</a></li>
+    <li><a href="#s3"><span class="n">3</span>הסטטוסים</a></li>
+    <li><a href="#s4"><span class="n">4</span>דף ההטבה</a></li>
+    <li><a href="#s5"><span class="n">5</span>הגשת קבלה</a></li>
+    <li><a href="#s6"><span class="n">6</span>אחרי ההגשה</a></li>
+    <li><a href="#faq"><span class="n">?</span>שאלות ותשובות</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section class="step" id="intro">
+  <div class="prose">
+    <h2>מה זה מצפן הזכויות</h2>
+    <p>מצפן הזכויות הוא אזור חדש באתר האישי של הביטוח הלאומי. הוא מרכז עבורכם, במקום אחד, את כל ההטבות והזכויות שמגיעות לכם כנפגעי פעולות איבה או כמשפחה שכולה.</p>
+    <ul>
+      <li>לראות אילו הטבות כבר אושרו לכם, ומה נשאר לכם לנצל בכל אחת מהן.</li>
+      <li>לעקוב אחרי סטטוס הטיפול בבקשות שהגשתם.</li>
+      <li>להגיש חשבוניות וקבלות להחזר, ישירות מתוך ההטבה.</li>
+      <li>לגלות הטבות נוספות שייתכן שאתם זכאים להן, ולבקש בדיקת זכאות.</li>
+    </ul>
+    <h3>למי המצפן מיועד בשלב זה</h3>
+    <ul>
+      <li><b>נפגעי פעולות איבה</b> שיש להם תיק איבה מוכר.</li>
+      <li><b>משפחות שכולות</b> שהוכרו כתלויים בעקבות פעולת איבה.</li>
+      <li><b>ילדים קטינים</b> עם תיק איבה או תיק שיקום עם הטבה פעילה. ההורה המוכר כנפגע איבה רואה את ההטבות של הילד בתוך המצפן שלו.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="step" id="s1">
+  <div class="step-head"><div class="n">1</div><div><h2>איך נכנסים למצפן</h2><p class="sub">ארבע לחיצות מהאתר האישי, כפי שאתם נכנסים אליו בדרך כלל.</p></div></div>
+  <ol class="howto">
+    <li><span>היכנסו לאתר האישי של הביטוח הלאומי.</span></li>
+    <li><span>בתפריט <span class="ui">פעולות באתר</span> שבצד ימין, לחצו על <span class="ui">מצפן הזכויות שלי</span>.</span></li>
+    <li><span>לחצו על <span class="ui">כניסה למצפן הזכויות</span>. ייפתח דף הסבר קצר.</span></li>
+    <li><span>בתחתית דף ההסבר לחצו על הכפתור הכחול <span class="ui">כניסה למצפן הזכויות</span>.</span></li>
+  </ol>
+  <figure>
+    <img src="img/01-entry-page.png" alt="דף הכניסה למצפן באתר האישי. בתפריט הצד מסומן הפריט מצפן הזכויות שלי, ומתחתיו כניסה למצפן הזכויות. בתחתית הדף מסומן כפתור כחול כניסה למצפן הזכויות." width="1354" height="707" loading="lazy">
+    <figcaption><b>דף הכניסה.</b> הפריט בתפריט הצד והכפתור הכחול בתחתית מסומנים באדום. דף ההסבר מזכיר שהמצפן חדש ומסביר בקצרה את שני חלקיו: "ההטבות שלי" ו"הטבות פוטנציאליות".</figcaption>
+  </figure>
+</section>
+
+<section class="step" id="s2">
+  <div class="step-head"><div class="n">2</div><div><h2>מה רואים במסך הראשי</h2><p class="sub">המסך בנוי מארבעה אזורים, מלמעלה למטה. המספרים והצבעים כאן תואמים לסימונים בצילום המסך.</p></div></div>
+  <div class="zones">
+    <div class="zone" style="--zc:#E8842B">
+      <h3>הצגת הטבות עבור</h3>
+      <p>בוחרים עבור מי להציג את ההטבות: עבורכם או עבור אחד מילדיכם הקטינים.</p>
+      <p class="warn">מופיע רק אם יש לכם ילדים קטינים שאתם מקבלים עבורם הטבות. אם אין, פשוט לא תראו אותו.</p>
+    </div>
+    <div class="zone" style="--zc:#2E9E4F">
+      <h3>חיפוש וקטגוריות</h3>
+      <p>חיפוש הטבה לפי שם, או סינון לפי נושא: טיפול / אביזר רפואי, שיקום מקצועי, רווחה, דיור, רכב, טיפול נפשי. לחיצה על "הכל" מציגה שוב את כל ההטבות.</p>
+    </div>
+    <div class="zone" style="--zc:#8E3BB5">
+      <h3>ההטבות שלי</h3>
+      <p>ההטבות שכבר ביקשתם, כל אחת ככרטיס. לחיצה על כרטיס פותחת את דף ההטבה עם כל הפרטים והבקשות שהגשתם בה.</p>
+    </div>
+    <div class="zone" style="--zc:#2A9BD6">
+      <h3>ההטבות הפוטנציאליות שלי</h3>
+      <p>הטבות שלפי הנתונים שלכם ייתכן שאתם זכאים להן, ועדיין לא ביקשתם. לחיצה על כרטיס מאפשרת להגיש בקשה לבדיקת זכאות.</p>
+    </div>
+  </div>
+  <figure>
+    <img src="img/02-main-screen-annotated.png" alt="המסך הראשי של המצפן עם ארבעה אזורים מסומנים: הצגת הטבות עבור בכתום, חיפוש לפי נושאים בירוק, ההטבות שלי בסגול, וההטבות הפוטנציאליות שלי בתכלת." width="933" height="503" loading="lazy">
+    <figcaption><b>המסך הראשי.</b> ארבעת האזורים לפי הסדר: הצגת הטבות עבור, חיפוש וקטגוריות, ההטבות שלי, ההטבות הפוטנציאליות שלי.</figcaption>
+  </figure>
+  <div class="note"><b>לתשומת לבכם</b>לפעמים אותה הטבה תופיע גם ב"ההטבות שלי" וגם ב"ההטבות הפוטנציאליות שלי". זה קורה כשאפשר להרחיב את ההטבה, למשל לבקש אותה לתקופה נוספת או עבור בן משפחה נוסף.</div>
+</section>
+
+<section class="step" id="s3">
+  <div class="step-head"><div class="n">3</div><div><h2>הסטטוסים ומה הם אומרים</h2><p class="sub">ליד כל הטבה מופיעה תגית סטטוס. חמישה סטטוסים אפשריים.</p></div></div>
+  <div class="statuses">
+    <div class="status" style="--c:var(--st-progress);--bg:var(--st-progress-bg)"><span class="pill">בטיפול</span><div class="what"><p>הגשתם בקשה ועדיין לא התקבלה בה החלטה.</p><p class="do"><b>מה עושים:</b> ממתינים. הסטטוס יתעדכן כאן כשתתקבל החלטה.</p></div></div>
+    <div class="status" style="--c:var(--st-active);--bg:var(--st-active-bg)"><span class="pill">פעילה</span><div class="what"><p>ההטבה אושרה ויש בה יתרה לניצול.</p><p class="do"><b>מה עושים:</b> מגישים חשבוניות וקבלות להחזר.</p></div></div>
+    <div class="status" style="--c:var(--st-ended);--bg:var(--st-ended-bg)"><span class="pill">הסתיימה</span><div class="what"><p>ההטבה נוצלה במלואה ולא נותרה בה יתרה.</p><p class="do"><b>מה עושים:</b> לא ניתן להגיש בה קבלות נוספות. אם לדעתכם מגיעה לכם תקופה נוספת, בדקו ב"ההטבות הפוטנציאליות שלי".</p></div></div>
+    <div class="status" style="--c:var(--st-rejected);--bg:var(--st-rejected-bg)"><span class="pill">נדחתה</span><div class="what"><p>הבקשה נדחתה. סיבת הדחייה מופיעה על הכרטיס.</p><p class="do"><b>מה עושים:</b> קוראים את סיבת הדחייה. בשאלות, פונים אלינו.</p></div></div>
+    <div class="status" style="--c:var(--st-potential);--bg:var(--st-potential-bg)"><span class="pill">פוטנציאלי</span><div class="what"><p>הטבה שעדיין לא ביקשתם וייתכן שאתם זכאים לה.</p><p class="do"><b>מה עושים:</b> לוחצים על "הגשת בקשה" ומבקשים בדיקת זכאות.</p></div></div>
+  </div>
+  <figure>
+    <img src="img/03-benefit-page-statuses.png" alt="דף הטבה לדוגמה בשם רפואה משלימה. למעלה כרטיס בסטטוס פעילה עם כפתור פרטים נוספים מסומן באדום, מתחתיו כרטיס בסטטוס הסתיימה, ולמטה הטבה פוטנציאלית עם כפתור הגשת בקשה." width="1268" height="889" loading="lazy">
+    <figcaption><b>דף הטבה לדוגמה.</b> על כל כרטיס מופיעים תאריך תחילת הזכאות, סכום ההטבה, הכמות (למשל שעות שבועיות או טיפולים) וסוג התשלום: חודשי, שנתי, חד-פעמי, או החזר הוצאות בכפוף להגשת חשבוניות. הנתונים בצילום הם לדוגמה בלבד.</figcaption>
+  </figure>
+</section>
+
+<section class="step" id="s4">
+  <div class="step-head"><div class="n">4</div><div><h2>דף ההטבה ו"פרטים נוספים"</h2><p class="sub">לחיצה על <span class="ui">פרטים נוספים</span> בכרטיס פותחת את התמונה המלאה של ההטבה, בשלושה חלקים.</p></div></div>
+  <div class="parts">
+    <div class="part"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h7M9 17h7"/></svg></div><div><h3>פרטי ההטבה</h3><p>הסטטוס, תקופת הזכאות, סכום ההטבה, הכמות וסוג התשלום, בדיוק כפי שאושרו לכם.</p></div></div>
+    <div class="part"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="10" width="18" height="5" rx="2.5"/><path d="M3 12.5h10" stroke-width="5" stroke-linecap="round"/></svg></div><div><h3>סיכום מימוש</h3><p>פס התקדמות שמראה כמה מההטבה כבר נוצל וכמה עוד נשאר. כך תמיד תדעו כמה עוד אפשר לנצל.</p></div></div>
+    <div class="part"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 9h16M4 14h16M10 9v11"/></svg></div><div><h3>בקשות להחזר</h3><p>כל החשבוניות והקבלות שהגשתם בהטבה זו, מקובצות לפי תאריך הבקשה: מספר החשבונית, התאריך, סכום החשבונית, הסכום שאושר לתשלום והסטטוס. סמל ההורדה פותח את הקבלה שהגשתם.</p></div></div>
+  </div>
+  <div class="meter" aria-label="דוגמה לפס סיכום מימוש">
+    <div class="row"><span>סיכום מימוש, לדוגמה</span><span>סכום ההטבה: <b class="num">3,240 ₪</b></span></div>
+    <div class="bar"><i></i></div>
+    <div class="row"><span>שולם: <b class="num">1,566 ₪</b></span><span>נותרו: <b class="num">1,674 ₪</b></span></div>
+  </div>
+  <figure>
+    <img src="img/04-benefit-details-refunds.png" alt="דף פרטי ההטבה. למעלה פרטי ההטבה, מתחת פס סיכום מימוש שמראה שולם 1,566 שקלים ונותרו 1,674 מתוך 3,240, ולמטה בקשות להחזר עם טבלת חשבוניות. כפתור להגשת חשבונית קבלה חדשה מסומן באדום." width="1270" height="1078" loading="lazy">
+    <figcaption><b>דף פרטי ההטבה.</b> מלמעלה למטה: פרטי ההטבה, סיכום מימוש, בקשות להחזר. הכפתור <b>להגשת חשבונית / קבלה חדשה</b> מסומן באדום.</figcaption>
+  </figure>
+</section>
+
+<section class="step" id="s5">
+  <div class="step-head"><div class="n">5</div><div><h2>איך מגישים חשבונית או קבלה להחזר</h2><p class="sub">אפשר להגיש קבלות רק בהטבה במצב <span class="pill" style="--c:var(--st-active);--bg:var(--st-active-bg);font-size:.85rem">פעילה</span>, כלומר שיש בה יתרה.</p></div></div>
+  <ol class="howto">
+    <li><span>היכנסו לדף ההטבה ולחצו על <span class="ui">פרטים נוספים</span>.</span></li>
+    <li><span>באזור "בקשות להחזר" לחצו על הכפתור הכחול <span class="ui">להגשת חשבונית / קבלה חדשה</span>.</span></li>
+    <li><span>ייפתח טופס מקוון. הפרטים שלכם וההטבה כבר ממולאים בו, כולל היתרה שנותרה לניצול.</span></li>
+    <li><span>צרפו את המסמכים הנדרשים להטבה זו, למשל החשבונית או הקבלה.</span></li>
+    <li><span>שלחו את הטופס.</span></li>
+  </ol>
+  <figure>
+    <img src="img/05-form-confirmation.png" alt="הודעת אישור בטופס בקשה להטבה לנפגעי פעולות איבה: תודה, פנייתך נקלטה להמשך טיפול. ניתן להתעדכן בסטטוס הבקשה בכל זמן נתון דרך האתר האישי בבירור מצפן הזכויות שלי." width="934" height="299" loading="lazy">
+    <figcaption><b>הודעת האישור.</b> לאחר השליחה מופיעה ההודעה "תודה, פנייתך נקלטה להמשך טיפול". מרגע זה הבקשה מופיעה במצפן ואפשר לעקוב אחרי הסטטוס שלה בכל זמן.</figcaption>
+  </figure>
+</section>
+
+<section class="step" id="s6">
+  <div class="step-head"><div class="n">6</div><div><h2>מה קורה אחרי שהגשתם בקשה</h2><p class="sub">הבקשה מופיעה בדף ההטבה ומתעדכנת שם, בלי שתצטרכו לעשות דבר.</p></div></div>
+  <div class="prose">
+    <ul>
+      <li>הבקשה מופיעה בדף ההטבה בסטטוס <b>בטיפול</b>.</li>
+      <li>כשתתקבל החלטה, הסטטוס יתעדכן ל<b>אושרה</b> או <b>נדחתה</b>, וב"בקשות להחזר" יופיע הסכום שאושר לתשלום.</li>
+      <li><b>אם הקבלה שייכת להטבה אחרת:</b> לפעמים קבלה מוגשת בטעות בהטבה לא מתאימה. במקרה כזה אנחנו מעבירים אותה להטבה הנכונה, ועל הכרטיס תופיע ההודעה "בקשה זו הועברה לטיפול בהטבה [שם ההטבה]". הבקשה לא אבדה, היא ממשיכה להיות מטופלת בהטבה המתאימה.</li>
+    </ul>
+  </div>
+  <figure>
+    <img src="img/06-request-moved.png" alt="כרטיס הטבה בסטטוס נדחתה, ובשורת סיבת הדחייה כתוב: בקשה זו הועברה לטיפול בהטבה מכשירים רפואיים מזרן לפצעי לחץ." width="1054" height="157" loading="lazy">
+    <figcaption><b>בקשה שהועברה להטבה אחרת.</b> ההודעה מופיעה בשורת "סיבת הדחייה" על הכרטיס. אין צורך להגיש שוב.</figcaption>
+  </figure>
+</section>
+
+<section class="step" id="tips">
+  <h2>דברים שכדאי לדעת</h2>
+  <div class="tips">
+    <div class="tip"><b>שנתיים אחרונות</b><p>המצפן מציג הטבות מהשנתיים האחרונות בלבד. הטבות ישנות יותר לא יופיעו בו.</p></div>
+    <div class="tip"><b>המצפן מתעדכן בהדרגה</b><p>אם הטבה שאתם מכירים לא מופיעה, ייתכן שהיא עדיין לא נוספה. הזכאות שלכם לא נפגעת מכך.</p></div>
+    <div class="tip"><b>ההטבות של הילדים</b><p>מופיעות באותו מצפן. בחרו את שם הילד ב"הצגת הטבות עבור".</p></div>
+    <div class="tip"><b>הכפתור "חזור"</b><p>בראש כל דף, מחזיר אתכם למסך הקודם.</p></div>
+  </div>
+</section>
+
+<section class="step" id="faq">
+  <h2>שאלות ותשובות</h2>
+  <div class="faq">
+    <div class="faq-group">
+      <h3>כניסה ומי רואה מה</h3>
+      <details><summary>אני לא מוצא את "מצפן הזכויות שלי" בתפריט. למה?</summary><div class="a"><p>בשלב זה המצפן מוצג רק למי שיש לו תיק איבה מוכר, למשפחות שכולות שהוכרו כתלויים, ולהורים של ילדים קטינים עם תיק איבה או שיקום פעיל. אם אתם שייכים לאחת הקבוצות ועדיין לא רואים את המצפן, פנו אלינו.</p></div></details>
+      <details><summary>אני רואה את המצפן אבל אין בו הטבות. מה זה אומר?</summary><div class="a"><p>המצפן מציג הטבות מהשנתיים האחרונות בלבד. אם לא הגשתם בקשות בתקופה זו, "ההטבות שלי" יהיה ריק. בדקו את "ההטבות הפוטנציאליות שלי" כדי לראות מה ייתכן שמגיע לכם.</p></div></details>
+      <details><summary>הטבה שאני מקבל לא מופיעה במצפן. האם איבדתי אותה?</summary><div class="a"><p>לא. המצפן נבנה בהדרגה והטבות נוספות מתווספות אליו. הזכאות שלכם לא תלויה במה שמוצג במצפן.</p></div></details>
+      <details><summary>איפה אני רואה את ההטבות של הילדים שלי?</summary><div class="a"><p>במסך הראשי, באזור "הצגת הטבות עבור", בחרו את שם הילד. האזור מופיע רק להורים שמקבלים הטבות עבור ילדים קטינים.</p></div></details>
+    </div>
+    <div class="faq-group">
+      <h3>סטטוסים</h3>
+      <details><summary>מה ההבדל בין "פעילה" ל"הסתיימה"?</summary><div class="a"><p>"פעילה" היא הטבה מאושרת שנשארה בה יתרה, ואפשר להגיש בה קבלות. "הסתיימה" היא הטבה שנוצלה במלואה.</p></div></details>
+      <details><summary>הבקשה שלי בסטטוס "בטיפול" כבר הרבה זמן. מה עושים?</summary><div class="a"><p>"בטיפול" אומר שהבקשה התקבלה ועדיין לא התקבלה בה החלטה. אין צורך להגיש שוב.</p></div></details>
+      <details><summary>הבקשה שלי נדחתה. איפה רואים למה?</summary><div class="a"><p>סיבת הדחייה מופיעה על כרטיס ההטבה עצמו, בשורה "סיבת הדחייה".</p></div></details>
+      <details><summary>למה אותה הטבה מופיעה גם ב"ההטבות שלי" וגם ב"הפוטנציאליות"?</summary><div class="a"><p>זה קורה כשאפשר להרחיב את ההטבה, למשל לבקש אותה לתקופה נוספת או עבור בן משפחה נוסף.</p></div></details>
+    </div>
+    <div class="faq-group">
+      <h3>הגשת קבלות והחזרים</h3>
+      <details><summary>למה אני לא רואה את הכפתור "להגשת חשבונית / קבלה חדשה"?</summary><div class="a"><p>הכפתור מופיע רק בהטבה במצב "פעילה". בהטבה שהסתיימה או שנדחתה אי אפשר להגיש קבלות.</p></div></details>
+      <details><summary>איך אני יודע כמה עוד נשאר לי לנצל?</summary><div class="a"><p>בדף ההטבה, באזור "סיכום מימוש", מופיע פס עם הסכום ששולם, מה שנותר, והסכום הכולל.</p></div></details>
+      <details><summary>הגשתי קבלה ומופיע "בקשה זו הועברה לטיפול בהטבה אחרת". מה זה אומר?</summary><div class="a"><p>הקבלה הוגשה בהטבה לא מתאימה, ואנחנו העברנו אותה להטבה הנכונה. הבקשה ממשיכה להיות מטופלת שם. אין צורך להגיש שוב.</p></div></details>
+      <details><summary>הגשתי קבלה ולא קיבלתי הודעת אישור. האם הבקשה התקבלה?</summary><div class="a"><p>אחרי שליחה תקינה מופיעה ההודעה "תודה, פנייתך נקלטה להמשך טיפול". אם לא ראיתם אותה, היכנסו לדף ההטבה ובדקו אם הבקשה מופיעה ב"בקשות להחזר". אם היא לא שם, הגישו שוב.</p></div></details>
+      <details><summary>אפשר לראות את הקבלה שהגשתי?</summary><div class="a"><p>כן. באזור "בקשות להחזר", ליד כל חשבונית יש סמל הורדה.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<section class="step" id="contact">
+  <div class="contact">
+    <h2>למי פונים בשאלות</h2>
+    <p>בכל שאלה על המצפן או על הטבה מסוימת, אנחנו כאן בשבילכם.</p>
+    <p><span class="ph">[[להשלים: עובד/ת השיקום המלווה, טלפון המוקד, שעות מענה, קישור לטופס פנייה]]</span></p>
+  </div>
+</section>
+
+</main>
+
+<footer>המדריך מבוסס על מסמך ההסבר הפנימי של אגף שיקום. צילומי המסך הם מסביבת בדיקות והנתונים בהם הם לדוגמה בלבד.</footer>
+
+</body>
+</html>
