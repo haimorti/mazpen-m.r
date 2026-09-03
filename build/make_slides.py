@@ -51,10 +51,41 @@ FONT_CSS = ''.join([
 ])
 
 
+def load_shot(name, bg='white'):
+    """Open a screenshot, flattening transparency onto white (a plain convert('RGB')
+    turns transparent pixels black, which is how the logo came out on a black card)."""
+    im = Image.open(os.path.join(SHOTS, name))
+    if im.mode in ('RGBA', 'LA', 'P'):
+        im = im.convert('RGBA')
+        flat = Image.new('RGB', im.size, bg)
+        flat.paste(im, mask=im.split()[-1])
+        return flat
+    return im.convert('RGB')
+
+
+def to_uri(im):
+    buf = io.BytesIO(); im.save(buf, 'PNG')
+    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+
+
+def spotlight(im, band, dim=0.45, blur=6):
+    """Full screenshot with everything outside the band blurred and dimmed, so the
+    band the narration is talking about reads as lifted out of the page."""
+    from PIL import ImageFilter, ImageEnhance
+    w, h = im.size
+    y0, y1 = int(band['y'] * h), int((band['y'] + band['h']) * h)
+    back = im.filter(ImageFilter.GaussianBlur(blur))
+    back = ImageEnhance.Brightness(back).enhance(1 - dim)
+    back = ImageEnhance.Color(back).enhance(0.45)
+    out = back.copy()
+    out.paste(im.crop((0, y0, w, y1)), (0, y0))
+    return out
+
+
 def shot_uri(name, crop=None, zoom=None):
     """Screenshot as a data URI. `crop` keeps the top/bottom 55%; `zoom` takes a
     fractional {x,y,w,h} box and upscales it with LANCZOS for the sharpest result."""
-    im = Image.open(os.path.join(SHOTS, name)).convert('RGB')
+    im = load_shot(name)
     w, h = im.size
     if zoom:
         box = (int(zoom.get('x', 0) * w), int(zoom['y'] * h),
@@ -66,11 +97,10 @@ def shot_uri(name, crop=None, zoom=None):
     elif crop:
         keep = int(h * 0.55)
         im = im.crop((0, 0, w, keep) if crop == 'top' else (0, h - keep, w, h))
-    buf = io.BytesIO(); im.save(buf, 'PNG')
-    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode(), im.size
+    return to_uri(im), im.size
 
 
-LOGO, _ = shot_uri('logo-rehab-division.png')
+LOGO = to_uri(load_shot('logo-rehab-division.png', bg='#F2F6FA'))   # match the slide ground
 
 CSS = FONT_CSS + """
 *{box-sizing:border-box}
@@ -87,6 +117,8 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   box-shadow:0 2px 4px rgba(20,34,54,.06),0 18px 50px rgba(20,34,54,.14);overflow:hidden;line-height:0}
 .frame img{display:block;max-width:1792px;max-height:700px;width:auto;height:auto}
 .shot{position:relative;display:inline-block;line-height:0}
+.frame.focus{width:1792px}
+.frame.focus img{width:100%;max-width:none;max-height:none;height:auto}
 .shot.fill{width:1792px}
 .shot.fill img{width:100%;max-width:none;height:auto}
 .hl{position:absolute;border:5px solid #DC2626;border-radius:10px;
@@ -105,8 +137,10 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .center .sub{font-size:44px;color:#4A5C70;font-weight:600}
 
 .body{position:absolute;top:132px;right:120px;left:120px;bottom:80px;display:flex;flex-direction:column;justify-content:center}
-.lead{font-size:46px;font-weight:600;color:#14477E;margin-bottom:38px;line-height:1.3}
-.pt{display:flex;align-items:flex-start;gap:28px;font-size:42px;line-height:1.35;margin-bottom:30px}
+.hero{font-family:'Rubik';font-weight:700;font-size:76px;color:#14477E;text-align:center;margin:0 0 44px;
+  line-height:1.15;letter-spacing:-.02em}
+.lead{font-size:40px;font-weight:700;color:#16202B;margin-bottom:30px;line-height:1.3}
+.pt{display:flex;align-items:flex-start;gap:28px;font-size:40px;line-height:1.35;margin-bottom:26px}
 .pt i{flex:none;width:56px;height:56px;border-radius:16px;background:#14477E;color:#fff;display:grid;
   place-items:center;font-style:normal;font-family:'Rubik';font-weight:600;font-size:30px;margin-top:4px}
 
@@ -161,10 +195,11 @@ def render(scene, total):
         body = (f"<div class='center'><img src='{LOGO}' alt=''>"
                 f"<h1>{esc(scene['title'])}</h1><div class='sub'>{esc(scene['sub'])}</div></div>")
     elif t == 'points':
+        hero = f"<h1 class='hero'>{esc(scene['hero'])}</h1>" if scene.get('hero') else ''
         lead = f"<div class='lead'>{esc(scene['lead'])}</div>" if scene.get('lead') else ''
         pts = ''.join(f"<div class='pt'><i>{i+1}</i><span>{esc(p)}</span></div>"
                       for i, p in enumerate(scene['points']))
-        body = head + f"<div class='body'>{lead}{pts}</div>"
+        body = head + f"<div class='body'>{hero}{lead}{pts}</div>"
     elif t == 'cards':
         cards = ''.join(
             f"<div class='card' style='--c:{c.get('color','#14477E')}'><h2>{esc(c['title'])}</h2>"
@@ -193,6 +228,14 @@ def render(scene, total):
                      + "</div>" for f in scene['fields'])
         note = f"<div class='pt' style='margin-top:34px'><i>!</i><span>{esc(scene['note'])}</span></div>" if scene.get('note') else ''
         body = head + f"<div class='body'>{lead}<div class='fields'>{fl}</div>{note}</div>"
+    elif t == 'shot' and scene.get('focus'):
+        im = load_shot(scene['img'])
+        src = to_uri(spotlight(im, scene['focus']))
+        cap = esc(scene['cap'])
+        if scene.get('cap_title'):
+            cap = f"<div class='ct'>{esc(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
+        body = (head + f"<div class='stage'><div class='frame focus'><img src='{src}' alt=''></div></div>"
+                f"<div class='cap'>{cap}</div>")
     else:  # shot
         src, _ = shot_uri(scene['img'], scene.get('crop'), scene.get('zoom'))
         hl = scene.get('highlight')
@@ -227,15 +270,29 @@ def srt_time(s):
 
 scenes = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
 total = len(scenes)
-concat, srt, t = [], [], 0.0
+concat, srt, motion, t = [], [], [], 0.0
 for idx, s in enumerate(scenes):
     s['n'] = idx + 1
     p = render(s, total)
     print('rendered', os.path.basename(p))
+    m = None
+    if s.get('focus'):
+        im = load_shot(s['img'])
+        disp_h = 1792 * im.height / im.width          # image height at the fixed focus layout
+        top = 132 + (712 - disp_h) / 2                # stage box: top 132, height 712
+        f = s['focus']
+        cy = top + (f['y'] + f['h'] / 2) * disp_h     # band centre, logical px
+        z = min(2.6, max(1.25, 712 / (f['h'] * disp_h)))
+        m = {'slide': os.path.basename(p), 'dur': s['dur'], 'zoom': round(z, 3),
+             'cx': round(960 * SCALE), 'cy': round(cy * SCALE)}
+    motion.append(m)
     concat.append(f"file '{p}'\nduration {s['dur']}")
     srt.append(f"{s['n']}\n{srt_time(t + 0.3)} --> {srt_time(t + s['dur'] - 0.3)}\n{s['vo']}\n")
     t += s['dur']
 concat.append(f"file '{p}'")  # repeat last frame so its duration is honored
 open(os.path.join(OUT, 'concat.txt'), 'w', encoding='utf-8').write('\n'.join(concat) + '\n')
 open(os.path.join(OUT, 'subtitles.srt'), 'w', encoding='utf-8').write('\n'.join(srt))
+json.dump([{'slide': f'{i+1:02d}.png', 'dur': s['dur'], **({'motion': motion[i]} if motion[i] else {})}
+           for i, s in enumerate(scenes)],
+          open(os.path.join(OUT, 'timeline.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(f'total {t:.0f}s, {total} slides at {W*SCALE}x{H*SCALE}')
