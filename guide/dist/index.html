@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>מצפן הזכויות שלי</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Rubik:wght@500;600;700&display=swap">
 <style>
 :root{
   --ground:#F3F7FB;
@@ -26,8 +26,8 @@
   --st-potential:#5E3A94;   --st-potential-bg:#EFE8F8;
   --st-progress:#8A5B00;    --st-progress-bg:#FFF1CF;
   --shadow:0 1px 2px rgba(27,39,52,.06),0 8px 24px rgba(27,39,52,.08);
-  --font-display:"Frank Ruhl Libre","David","Times New Roman",serif;
-  --font-body:"Heebo","Segoe UI","Arial",sans-serif;
+  --font-display:"Rubik","Assistant","Segoe UI",sans-serif;
+  --font-body:"Assistant","Segoe UI",Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -61,7 +61,7 @@ html{scroll-behavior:smooth}
 body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.65;text-align:right;direction:rtl}
 a{color:var(--accent)}
 a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
-h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.2;margin:0;text-wrap:balance}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.2;margin:0;text-wrap:balance;letter-spacing:-.015em}
 h1{font-size:clamp(2rem,4.5vw,3.1rem)}
 h2{font-size:clamp(1.55rem,3vw,2.1rem)}
 h3{font-size:1.25rem;font-family:var(--font-body);font-weight:700}
@@ -89,7 +89,7 @@ nav.steps a .n{display:inline-grid;place-items:center;width:1.5rem;height:1.5rem
 main{max-width:1040px;margin:0 auto;padding:1rem 1.25rem 4rem;display:grid;gap:3.5rem}
 section.step{display:grid;gap:1.25rem;scroll-margin-top:4.5rem}
 .step-head{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start}
-.step-head .n{font-family:var(--font-display);font-size:2.6rem;font-weight:700;line-height:1;color:var(--accent);min-width:2.2rem;text-align:center;margin-top:-.15rem}
+.step-head .n{font-family:var(--font-display);font-size:2.6rem;font-weight:600;line-height:1;color:var(--accent);min-width:2.2rem;text-align:center;margin-top:-.15rem}
 .step-head .sub{color:var(--ink-2);margin-top:.35rem;max-width:40rem}
 .prose{max-width:42rem;display:grid;gap:.9rem}
 .prose ul,.prose ol{margin:0;padding-right:1.4rem;display:grid;gap:.4rem}
@@ -148,6 +148,30 @@ figcaption b{color:var(--ink)}
 .tip b{font-size:1.05rem}
 .tip p{color:var(--ink-2);font-size:1rem}
 
+/* two routes */
+.routes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21rem),1fr));gap:1.25rem}
+.route{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--rc,var(--accent));
+  border-radius:12px;padding:1.25rem 1.35rem;display:grid;gap:.7rem;align-content:start}
+.route h3{color:var(--rc,var(--accent));font-size:1.2rem}
+.route .fake-btn{justify-self:start;background:var(--rc,var(--accent));color:#fff;border-radius:8px;
+  padding:.4rem 1rem;font-weight:700;font-size:.95rem;display:inline-flex;gap:.4rem;align-items:center}
+.route ul{margin:0;padding-right:1.2rem;display:grid;gap:.3rem;font-size:1rem;color:var(--ink-2)}
+.route ul li::marker{color:var(--rc,var(--accent))}
+
+/* form flow */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1rem;counter-reset:f}
+.fstep{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;display:grid;gap:.5rem;align-content:start}
+.fstep .num{display:inline-grid;place-items:center;width:2rem;height:2rem;border-radius:10px;background:var(--accent);
+  color:var(--accent-ink);font-weight:700;font-size:.95rem}
+.fstep p{color:var(--ink-2);font-size:1rem}
+
+/* invoice fields */
+.fieldlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:.7rem;max-width:52rem}
+.fld{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.7rem .9rem;display:grid;gap:.15rem}
+.fld b{font-size:1rem}
+.fld .req{color:var(--st-rejected);font-weight:700}
+.fld small{color:var(--ink-2);font-size:.88rem}
+
 /* faq */
 .faq{display:grid;gap:.5rem;max-width:46rem}
 details{background:var(--surface);border:1px solid var(--line);border-radius:8px}
@@ -178,7 +202,7 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
 <header class="hero">
   <p class="eyebrow">האזור האישי · חדש</p>
   <h1>מצפן הזכויות שלי</h1>
-  <p class="lede">מדריך קצר שמסביר איך נכנסים למצפן, מה רואים בו, מה אומר כל סטטוס, ואיך מגישים קבלות להחזר.</p>
+  <p class="lede">כל הזכויות וההטבות שלך במקום אחד. מדריך קצר שמסביר איך נכנסים למצפן, מה רואים בו, איך מגישים בקשה להטבה, ומה אומר כל סטטוס.</p>
   <div class="hero-note">
     <strong>חשוב לדעת לפני שמתחילים</strong>
     המצפן נמצא כעת בשלבי בנייה והרצה, ובשלב זה הוא מיועד להטבות של נפגעי איבה ומשפחות שכולות. אנחנו מוסיפים אליו הטבות חדשות בהדרגה, ולכן ייתכן שהטבה מסוימת עדיין לא מופיעה בו. הזכאות שלכם לא נפגעת מכך.
@@ -189,10 +213,12 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
   <ol>
     <li><a href="#s1"><span class="n">1</span>כניסה</a></li>
     <li><a href="#s2"><span class="n">2</span>המסך הראשי</a></li>
-    <li><a href="#s3"><span class="n">3</span>הסטטוסים</a></li>
-    <li><a href="#s4"><span class="n">4</span>דף ההטבה</a></li>
-    <li><a href="#s5"><span class="n">5</span>הגשת קבלה</a></li>
-    <li><a href="#s6"><span class="n">6</span>אחרי ההגשה</a></li>
+    <li><a href="#s3"><span class="n">3</span>הגשת בקשה</a></li>
+    <li><a href="#s4"><span class="n">4</span>טופס הבקשה</a></li>
+    <li><a href="#s5"><span class="n">5</span>הסטטוסים</a></li>
+    <li><a href="#s6"><span class="n">6</span>דף ההטבה</a></li>
+    <li><a href="#s7"><span class="n">7</span>הגשת קבלה</a></li>
+    <li><a href="#s8"><span class="n">8</span>אחרי ההגשה</a></li>
     <li><a href="#faq"><span class="n">?</span>שאלות ותשובות</a></li>
   </ol>
 </nav>
@@ -201,13 +227,13 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
 
 <section class="step" id="intro">
   <div class="prose">
-    <h2>מה זה מצפן הזכויות</h2>
-    <p>מצפן הזכויות הוא אזור חדש באתר האישי של הביטוח הלאומי. הוא מרכז עבורכם, במקום אחד, את כל ההטבות והזכויות שמגיעות לכם כנפגעי פעולות איבה או כמשפחה שכולה.</p>
+    <h2>כל הזכויות וההטבות שלך במקום אחד</h2>
+    <p>מצפן הזכויות מרכז עבורך מידע אישי על הזכויות וההטבות שלך כנפגע פעולות איבה. במצפן אפשר:</p>
     <ul>
-      <li>לראות אילו הטבות כבר אושרו לכם, ומה נשאר לכם לנצל בכל אחת מהן.</li>
-      <li>לעקוב אחרי סטטוס הטיפול בבקשות שהגשתם.</li>
-      <li>להגיש חשבוניות וקבלות להחזר, ישירות מתוך ההטבה.</li>
-      <li>לגלות הטבות נוספות שייתכן שאתם זכאים להן, ולבקש בדיקת זכאות.</li>
+      <li><b>לגלות הטבות</b> שעשויות להתאים לך, ולבדוק כיצד ניתן להגיש בקשה למימושן.</li>
+      <li><b>לעקוב אחר ההטבות והבקשות שלך</b>, ולראות מה מצבן: בטיפול, פעילות, הסתיימו או נדחו.</li>
+      <li><b>לראות את פרטי ההטבה והמימוש שלה</b>, כולל תקופת הזכאות, היתרה שנותרה ובקשות להחזר שכבר הוגשו.</li>
+      <li><b>להגיש חשבוניות וקבלות להחזר</b> עבור הטבות פעילות, ישירות דרך המצפן.</li>
     </ul>
     <h3>למי המצפן מיועד בשלב זה</h3>
     <ul>
@@ -261,7 +287,56 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
 </section>
 
 <section class="step" id="s3">
-  <div class="step-head"><div class="n">3</div><div><h2>הסטטוסים ומה הם אומרים</h2><p class="sub">ליד כל הטבה מופיעה תגית סטטוס. חמישה סטטוסים אפשריים.</p></div></div>
+  <div class="step-head"><div class="n">3</div><div><h2>לגלות הטבה ולהגיש בקשה</h2><p class="sub">ב"ההטבות הפוטנציאליות שלי" מוצגות הטבות שייתכן שמגיעות לכם לפי הנתונים האישיים שלכם, ועדיין לא ביקשתם אותן.</p></div></div>
+  <div class="prose">
+    <p>המגוון רחב: לימודים והכשרה מקצועית, דיור והלוואות, טיפולים ואביזרים רפואיים, תמיכה נפשית ועוד. לחיצה על כרטיס הטבה פותחת את פרטיה ואת האפשרות להגיש בקשה לבדיקת זכאות.</p>
+  </div>
+  <h3>שני מצבים אפשריים בלחיצה על הטבה</h3>
+  <div class="routes">
+    <div class="route" style="--rc:var(--st-active)">
+      <h3>הטבה שאפשר להגיש בה מיד</h3>
+      <span class="fake-btn">הגשת בקשה</span>
+      <p>הבקשה נבדקת על ידי המערכת, בלי צורך בהתערבות של עובד שיקום.</p>
+      <ul>
+        <li>אפשר לצרף קבלה כבר עכשיו.</li>
+        <li>הבדיקה מהירה, וברוב המקרים התשובה מתקבלת במהירות.</li>
+      </ul>
+    </div>
+    <div class="route" style="--rc:var(--st-potential)">
+      <h3>הטבה שמתחילה בפנייה</h3>
+      <span class="fake-btn">הגשת בקשה</span>
+      <p>הבקשה נשלחת לגורם המקצועי המתאים, שבודק את הזכאות.</p>
+      <ul>
+        <li>פנייה למוקד רכב, למוקד דיור, או לעובד השיקום.</li>
+        <li>הסטטוס יתעדכן במצפן.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>חשוב לדעת</b>הגשת בקשה אינה מהווה אישור אוטומטי לקבלת ההטבה. הזכאות נבדקת על פי הקריטריונים שנקבעו בחוק ובהתאם למסמכים שהוגשו.</div>
+</section>
+
+<section class="step" id="s4">
+  <div class="step-head"><div class="n">4</div><div><h2>טופס הבקשה: שלושה שלבים</h2><p class="sub">הטופס קצר. בראשו מופיע סרגל שמראה באיזה שלב אתם נמצאים.</p></div></div>
+  <div class="flow">
+    <div class="fstep"><span class="num">1</span><h3>פרטי ההטבה</h3><p>ממלאים את <b>תאריך תחילת מימוש ההטבה</b>. אפשר להגיש עד שנה אחורה.</p></div>
+    <div class="fstep"><span class="num">2</span><h3>מסמכים נדרשים</h3><p>מצרפים את החשבונית או הקבלה, ומזינים את פרטיה. כל הטבה דורשת מסמכים אחרים, לפי מה שהוגדר לה.</p></div>
+    <div class="fstep"><span class="num">3</span><h3>הצהרה וחתימה</h3><p>מאשרים את ההצהרה וחותמים, בעכבר במחשב או באצבע על המסך בנייד.</p></div>
+  </div>
+  <h3>מה ממלאים בשלב המסמכים</h3>
+  <div class="fieldlist">
+    <div class="fld"><b>מספר חשבונית<span class="req"> *</span></b></div>
+    <div class="fld"><b>תאריך חשבונית<span class="req"> *</span></b></div>
+    <div class="fld"><b>סכום החשבונית כולל מע"מ<span class="req"> *</span></b></div>
+    <div class="fld"><b>מספר מזהה ספק</b><small>נותן השירות: תעודת זהות, חברה או עמותה</small></div>
+    <div class="fld"><b>תקופה: מתאריך עד תאריך</b></div>
+    <div class="fld"><b>כמות</b></div>
+  </div>
+  <div class="note"><b>חשבונית עם כמה פריטים</b>אם על החשבונית מופיעים כמה פריטים, למשל כמה טיפולים, ממלאים תקופה מתאריך עד תאריך, את הכמות, ואת סכום החשבונית הכולל. כפתור "הוסף חשבונית" מאפשר לצרף חשבונית נוספת לאותה בקשה.</div>
+  <div class="prose"><p>אחרי השליחה ההטבה עוברת ל<b>"ההטבות שלי"</b>, ומשם אפשר להיכנס אליה ולראות בכל רגע את מצב הבקשה.</p></div>
+</section>
+
+<section class="step" id="s5">
+  <div class="step-head"><div class="n">5</div><div><h2>הסטטוסים ומה הם אומרים</h2><p class="sub">ליד כל הטבה מופיעה תגית סטטוס. חמישה סטטוסים אפשריים.</p></div></div>
   <div class="statuses">
     <div class="status" style="--c:var(--st-progress);--bg:var(--st-progress-bg)"><span class="pill">בטיפול</span><div class="what"><p>הגשתם בקשה ועדיין לא התקבלה בה החלטה.</p><p class="do"><b>מה עושים:</b> ממתינים. הסטטוס יתעדכן כאן כשתתקבל החלטה.</p></div></div>
     <div class="status" style="--c:var(--st-active);--bg:var(--st-active-bg)"><span class="pill">פעילה</span><div class="what"><p>ההטבה אושרה ויש בה יתרה לניצול.</p><p class="do"><b>מה עושים:</b> מגישים חשבוניות וקבלות להחזר.</p></div></div>
@@ -275,8 +350,8 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
   </figure>
 </section>
 
-<section class="step" id="s4">
-  <div class="step-head"><div class="n">4</div><div><h2>דף ההטבה ו"פרטים נוספים"</h2><p class="sub">לחיצה על <span class="ui">פרטים נוספים</span> בכרטיס פותחת את התמונה המלאה של ההטבה, בשלושה חלקים.</p></div></div>
+<section class="step" id="s6">
+  <div class="step-head"><div class="n">6</div><div><h2>דף ההטבה ו"פרטים נוספים"</h2><p class="sub">לחיצה על <span class="ui">פרטים נוספים</span> בכרטיס פותחת את התמונה המלאה של ההטבה, בשלושה חלקים.</p></div></div>
   <div class="parts">
     <div class="part"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v6h6M9 13h7M9 17h7"/></svg></div><div><h3>פרטי ההטבה</h3><p>הסטטוס, תקופת הזכאות, סכום ההטבה, הכמות וסוג התשלום, בדיוק כפי שאושרו לכם.</p></div></div>
     <div class="part"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="10" width="18" height="5" rx="2.5"/><path d="M3 12.5h10" stroke-width="5" stroke-linecap="round"/></svg></div><div><h3>סיכום מימוש</h3><p>פס התקדמות שמראה כמה מההטבה כבר נוצל וכמה עוד נשאר. כך תמיד תדעו כמה עוד אפשר לנצל.</p></div></div>
@@ -293,8 +368,8 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
   </figure>
 </section>
 
-<section class="step" id="s5">
-  <div class="step-head"><div class="n">5</div><div><h2>איך מגישים חשבונית או קבלה להחזר</h2><p class="sub">אפשר להגיש קבלות רק בהטבה במצב <span class="pill" style="--c:var(--st-active);--bg:var(--st-active-bg);font-size:.85rem">פעילה</span>, כלומר שיש בה יתרה.</p></div></div>
+<section class="step" id="s7">
+  <div class="step-head"><div class="n">7</div><div><h2>איך מגישים חשבונית או קבלה להחזר</h2><p class="sub">אפשר להגיש קבלות רק בהטבה במצב <span class="pill" style="--c:var(--st-active);--bg:var(--st-active-bg);font-size:.85rem">פעילה</span>, כלומר שיש בה יתרה.</p></div></div>
   <ol class="howto">
     <li><span>היכנסו לדף ההטבה ולחצו על <span class="ui">פרטים נוספים</span>.</span></li>
     <li><span>באזור "בקשות להחזר" לחצו על הכפתור הכחול <span class="ui">להגשת חשבונית / קבלה חדשה</span>.</span></li>
@@ -308,8 +383,8 @@ footer{max-width:1040px;margin:0 auto;padding:1.5rem 1.25rem 3rem;color:var(--in
   </figure>
 </section>
 
-<section class="step" id="s6">
-  <div class="step-head"><div class="n">6</div><div><h2>מה קורה אחרי שהגשתם בקשה</h2><p class="sub">הבקשה מופיעה בדף ההטבה ומתעדכנת שם, בלי שתצטרכו לעשות דבר.</p></div></div>
+<section class="step" id="s8">
+  <div class="step-head"><div class="n">8</div><div><h2>מה קורה אחרי שהגשתם בקשה</h2><p class="sub">הבקשה מופיעה בדף ההטבה ומתעדכנת שם, בלי שתצטרכו לעשות דבר.</p></div></div>
   <div class="prose">
     <ul>
       <li>הבקשה מופיעה בדף ההטבה בסטטוס <b>בטיפול</b>.</li>
