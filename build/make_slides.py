@@ -365,6 +365,16 @@ def render(scene, total, step=None):
                 f"<div class='frame'><div class='shot'><img src='{to_uri(im)}' alt=''>{hl_div}</div></div>"
                 f"<div class='plead' style='--c:{c['color']}'>{esc(c['leads'])}</div></div>")
         body = head + f"<div class='pair'>{''.join(cols)}</div>"
+    elif t == 'walk':
+        st = scene['steps'][scene.get('_step', 0)]
+        im = spotlight(load_shot(scene['img']), st['focus'], dim=0.42, blur=6)
+        sw, sh = fit(im)
+        hl = st.get('highlight')
+        hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
+                  f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+        body = (head + f"<div class='stage'><div class='frame'><div class='shot' style='width:{sw}px'>"
+                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
+                f"<div class='cap'>{esc(st['cap'])}</div>")
     elif t == 'statuslist':
         im = load_shot(scene['img'])
         act = scene.get('_lit')
@@ -459,7 +469,13 @@ total = len(scenes)
 concat, srt, frames, t = [], [], [], 0.0
 for idx, s in enumerate(scenes):
     s['n'] = idx + 1
-    if s['type'] == 'fork':
+    if s['type'] == 'walk':
+        for k, st in enumerate(s['steps']):
+            s['_step'] = k
+            fp = render(s, total, step=k)
+            frames.append((fp, st['dur'], None))
+        p = fp
+    elif s['type'] == 'fork':
         for k, fr in enumerate(s['frames']):
             s['_step'] = k
             fp = render(s, total, step=k)

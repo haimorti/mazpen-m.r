@@ -13,6 +13,7 @@ def visual(s):
     if t == 'cards':   return 'מסך טקסט, שני כרטיסים זה לצד זה'
     if t == 'flow':    return 'מסך טקסט, שלושה שלבים בשורה'
     if t == 'fields':  return 'מסך טקסט, שדות הטופס'
+    if t == 'walk':     return s['img'] + ' (עמוד שלם, ההדגשה יורדת בו)'
     if t == 'fork':     return ' + '.join(c['img'] for c in s['cols']) + ' (כפתור, ומתחתיו המסך שנפתח)'
     if t == 'compare':  return ' + '.join(r['img'] for r in s['rows']) + ' (שורות הכרטיס, מוגדלות)'
     if t == 'pair':    return ' + '.join(c['img'] for c in s['cols']) + ' (זה לצד זה)'
