@@ -213,10 +213,9 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   line-height:1.15;letter-spacing:-.02em}
 .lead{font-size:40px;font-weight:700;color:#16202B;margin-bottom:30px;line-height:1.3}
 .pt{display:flex;align-items:flex-start;gap:28px;font-size:40px;line-height:1.35;margin-bottom:26px}
-.pt{transition:none}
-.pt.off{visibility:hidden}
-.pt.on{color:#14477E;font-weight:600}
-.pt.on i{background:#DC7B1E;transform:scale(1.12)}
+.pt{color:#4A5C70;border-radius:14px;padding:6px 14px;margin-right:-14px}
+.pt.on{color:#16202B;font-weight:600;background:#E4EDF7}
+.pt.on i{background:#DC7B1E}
 .pt i{flex:none;width:56px;height:56px;border-radius:16px;background:#14477E;color:#fff;display:grid;
   place-items:center;font-style:normal;font-family:'Rubik';font-weight:600;font-size:30px;margin-top:4px}
 
@@ -276,8 +275,7 @@ def render(scene, total, step=None):
         lead = f"<div class='lead'>{esc(scene['lead'])}</div>" if scene.get('lead') else ''
         shown = scene.get('_shown', len(scene['points']))     # how many bullets are out yet
         pts = ''.join(
-            f"<div class='pt{' on' if i + 1 == shown else ''}"
-            f"{' off' if i + 1 > shown else ''}'><i>{i+1}</i><span>{esc(p)}</span></div>"
+            f"<div class='pt{' on' if i + 1 == shown else ''}'><i>{i+1}</i><span>{esc(p)}</span></div>"
             for i, p in enumerate(scene['points']))
         body = head + f"<div class='body'>{hero}{lead}{pts}</div>"
     elif t == 'cards':
