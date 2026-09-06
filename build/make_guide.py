@@ -188,10 +188,11 @@ dl.faq dd{margin:.2em 0 0;padding-bottom:.7em;border-bottom:1px solid #E4EAF1;
   color:#3E5164;line-height:1.55;break-inside:avoid}
 dl.faq dd:last-of-type{border-bottom:none}
 .routes{display:flex;flex-direction:column;gap:.8em}
-.route{border:1px solid #D3DDE7;border-inline-start:5px solid var(--c);border-radius:0 8px 8px 0;
-  padding:.7em .9em}
-.route img{display:block;width:58%;max-width:230px;margin-bottom:.5em;
+.route{display:flex;align-items:center;gap:1em;border:1px solid #D3DDE7;
+  border-inline-start:5px solid var(--c);border-radius:0 8px 8px 0;padding:.55em .8em}
+.route img{display:block;flex:none;width:30%;max-width:135px;
   border:1px solid #E4EAF1;border-radius:5px}
+.route p{margin:0}
 .route b{color:var(--c)}
 .cover{display:flex;flex-direction:column;justify-content:center;min-height:94vh;gap:.5em;
   break-after:page}
@@ -209,6 +210,7 @@ SIZES = {
     'desktop': ("@page{size:A4;margin:20mm 22mm}"
                 "body{font-size:11.5pt}h1{font-size:30pt}h2{font-size:17pt}h3{font-size:13.5pt}"
                 ".bx i{width:26px;height:26px;font-size:14px;right:-15px}"
+                "section.newpage{break-before:page}"
                 "figcaption{font-size:10.5pt}",
                 'דסקטופ'),
 }
@@ -233,13 +235,9 @@ def faq(group, *qa):
 def faq_section(num):
     if not _faq:
         return ''
-    merged = {}                       # one heading per group, in first-seen order
-    for group, qa in _faq:
-        merged.setdefault(group, []).extend(qa)
-    blocks = ''.join(
-        f"<h3>{esc(group)}</h3><dl class='faq'>"
-        + ''.join(f"<dt>{esc(q)}</dt><dd>{a}</dd>" for q, a in qa) + "</dl>"
-        for group, qa in merged.items())
+    blocks = ("<dl class='faq'>"
+              + ''.join(f"<dt>{esc(q)}</dt><dd>{a}</dd>"
+                        for _, qa in _faq for q, a in qa) + "</dl>")
     return (f"<section><h2><span class='num'>{num}</span> שאלות נפוצות</h2>"
             f"{blocks}</section>")
 
@@ -400,8 +398,8 @@ def invoice_html():
   <p>כדאי שיהיה מוכן מראש קובץ סרוק או מצולם של חשבונית המס או הקבלה שברשותך.</p>
 </section>
 
-<section>
-  <h2><span class="num">2</span> שתי דרכים להגיע לטופס</h2>
+<section class="newpage">
+  <h2><span class="num">2</span> שתי דרכים להגיש</h2>
   <p>{esc(inv_zones['cap'])}</p>
   {figure('27-main-screen-rm.png', keep=0.928, boxes=inv_zones['zones'],
           caption='1 — הדרך המועדפת. 2 — רק אם ההטבה לא מופיעה למעלה.')}
@@ -420,7 +418,7 @@ def invoice_html():
         'אי אפשר להגיש קבלות.'))}
 </section>
 
-<section>
+<section class="newpage">
   <h2><span class="num">3</span> אם ההטבה לא מופיעה ב"ההטבות שלי"</h2>
   <p>מחפשים אותה בהטבות הפוטנציאליות. שימו לב: בשלב זה עדיין לא כל ההטבות
      הפוטנציאליות פתוחות להגשת חשבוניות דרך המצפן. {esc(inv_fork['hint'])}</p>
@@ -431,7 +429,9 @@ def invoice_html():
 
 <section>
   <h2><span class="num">4</span> שלושת שלבי הטופס</h2>
-  <p>משתי הדרכים מגיעים לאותו טופס.</p>
+  <p>מצאתם את ההטבה ולחצתם על הכפתור — בין אם דרך "ההטבות שלי" ובין אם דרך ההטבות
+     הפוטנציאליות. מכאן והלאה התהליך זהה בשתי הדרכים: נפתח אותו טופס, בן שלושה שלבים,
+     ובסופו נשלחת החשבונית.</p>
   <h3>שלב 1 — פרטי ההטבה</h3>
   <p>רק בודקים שהפרטים נכונים ולוחצים <b>הבא</b>.</p>
   <h3>שלב 2 — צירוף החשבונית ופרטיה</h3>
@@ -452,9 +452,7 @@ def invoice_html():
         'ממלאים תקופה מתאריך עד תאריך, את הכמות, ואת סכום החשבונית הכולל.'),
        ('יש לי כמה חשבוניות לאותה בקשה.',
         'אחרי מילוי הפרטים של החשבונית הראשונה לוחצים על "+ הוסף חשבונית".'),
-       ('עד מתי אחורה אפשר להגיש?',
-        'בשלב הראשון של הטופס ממלאים את תאריך תחילת מימוש ההטבה. '
-        'ניתן להגיש עד שנה אחורה.'),
+       ('עד מתי אחורה אפשר להגיש?', 'ניתן להגיש עד שנה אחורה.'),
        ('איך חותמים?', 'בעכבר במחשב, או באצבע על המסך במכשיר נייד.'))}
   <div class="note"><b>הגשת בקשה אינה אישור אוטומטי לקבלת ההטבה.</b>
     הזכאות תיבדק לפי הקריטריונים שנקבעו בחוק ובהתאם למסמכים שהוגשו.</div>
