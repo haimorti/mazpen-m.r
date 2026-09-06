@@ -11,7 +11,13 @@ Output: build/out/slides/NN.png, build/out/concat.txt, build/out/subtitles.srt
 import base64, io, json, os, subprocess, sys, shutil, html
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCENES_FILE = 'scenes.json'                    # a second guide lives in its own scenes file
+if '--scenes' in sys.argv:
+    SCENES_FILE = sys.argv[sys.argv.index('--scenes') + 1]
+NAME = os.path.splitext(os.path.basename(SCENES_FILE))[0]
 OUT = os.path.join(ROOT, 'build', 'out')
+if NAME != 'scenes':
+    OUT = os.path.join(OUT, NAME)
 SLIDES = os.path.join(OUT, 'slides')
 SHOTS = os.path.join(ROOT, 'source', 'screenshots')
 FONTS = os.path.join(ROOT, 'build', 'fonts')
@@ -110,9 +116,21 @@ def stage_h(scene):
     return 802 if scene.get('big') else 712
 
 
+def ink_bbox(im, thr=246, pad=8):
+    """Bounding box of everything that isn't page background, with a small margin."""
+    dark = im.convert('L').point(lambda v: 255 if v < thr else 0)
+    bb = dark.getbbox()
+    if not bb:
+        return (0, 0, im.width, im.height)
+    return (max(0, bb[0] - pad), max(0, bb[1] - pad),
+            min(im.width, bb[2] + pad), min(im.height, bb[3] + pad))
+
+
 def shot_im(scene):
     """The screenshot exactly as the slide shows it: cropped, but not yet spotlit."""
     im = load_shot(scene['img'])
+    if scene.get('trim'):                  # a capture with wide empty margins
+        im = im.crop(ink_bbox(im))
     if scene.get('keep') or scene.get('keepx'):
         im = im.crop((0, 0, int(im.width * scene.get('keepx', 1.0)),
                       int(im.height * scene.get('keep', 1.0))))
@@ -509,7 +527,7 @@ def srt_time(s):
     return f"{h:02d}:{m:02d}:{sec:02d},{ms:03d}"
 
 
-scenes = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
+scenes = json.load(open(os.path.join(ROOT, 'build', SCENES_FILE), encoding='utf-8'))
 total = len(scenes)
 concat, srt, frames, t = [], [], [], 0.0
 for idx, s in enumerate(scenes):

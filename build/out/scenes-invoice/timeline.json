@@ -1,0 +1,351 @@
+[
+ {
+  "slide": "01.png",
+  "dur": 4
+ },
+ {
+  "slide": "02a.png",
+  "dur": 3.0
+ },
+ {
+  "slide": "02b.png",
+  "dur": 3.0
+ },
+ {
+  "slide": "02c.png",
+  "dur": 3.0
+ },
+ {
+  "slide": "03.png",
+  "dur": 6,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 1073,
+     "y": 348,
+     "click": false
+    },
+    {
+     "t": 1.5,
+     "x": 1353,
+     "y": 546,
+     "click": true
+    },
+    {
+     "t": 3.0,
+     "x": 1353,
+     "y": 578,
+     "click": true
+    },
+    {
+     "t": 4.6,
+     "x": 573,
+     "y": 700,
+     "click": true
+    },
+    {
+     "t": 5.6,
+     "x": 573,
+     "y": 700,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "04.png",
+  "dur": 9
+ },
+ {
+  "slide": "05.png",
+  "dur": 7,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 991,
+     "click": false
+    },
+    {
+     "t": 2.4,
+     "x": 1215,
+     "y": 388,
+     "click": true
+    },
+    {
+     "t": 4.6,
+     "x": 556,
+     "y": 520,
+     "click": true
+    },
+    {
+     "t": 6.2,
+     "x": 556,
+     "y": 520,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "06.png",
+  "dur": 6,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 991,
+     "click": false
+    },
+    {
+     "t": 2.8,
+     "x": 411,
+     "y": 644,
+     "click": true
+    },
+    {
+     "t": 5.2,
+     "x": 411,
+     "y": 644,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "07.png",
+  "dur": 8,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 991,
+     "click": false
+    },
+    {
+     "t": 3.4,
+     "x": 619,
+     "y": 621,
+     "click": true
+    },
+    {
+     "t": 7.2,
+     "x": 619,
+     "y": 621,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "08.png",
+  "dur": 7,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 991,
+     "click": false
+    },
+    {
+     "t": 3.0,
+     "x": 1150,
+     "y": 631,
+     "click": true
+    },
+    {
+     "t": 5.4,
+     "x": 1056,
+     "y": 693,
+     "click": true
+    },
+    {
+     "t": 6.4,
+     "x": 1056,
+     "y": 693,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "09a.png",
+  "dur": 4,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 1150,
+     "y": 980
+    },
+    {
+     "t": 2.6,
+     "x": 1425,
+     "y": 246,
+     "click": true
+    },
+    {
+     "t": 3.9,
+     "x": 1425,
+     "y": 246
+    }
+   ]
+  }
+ },
+ {
+  "slide": "09b.png",
+  "dur": 3.5,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 1425,
+     "y": 246
+    },
+    {
+     "t": 3.4,
+     "x": 1425,
+     "y": 246
+    }
+   ]
+  }
+ },
+ {
+  "slide": "09c.png",
+  "dur": 4,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 1425,
+     "y": 246
+    },
+    {
+     "t": 2.4,
+     "x": 495,
+     "y": 246,
+     "click": true
+    },
+    {
+     "t": 3.9,
+     "x": 495,
+     "y": 246
+    }
+   ]
+  }
+ },
+ {
+  "slide": "09d.png",
+  "dur": 3.5,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 495,
+     "y": 246
+    },
+    {
+     "t": 3.4,
+     "x": 495,
+     "y": 246
+    }
+   ]
+  }
+ },
+ {
+  "slide": "10.png",
+  "dur": 7,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 894,
+     "click": false
+    },
+    {
+     "t": 3.4,
+     "x": 957,
+     "y": 788,
+     "click": true
+    },
+    {
+     "t": 6.2,
+     "x": 957,
+     "y": 788,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "11.png",
+  "dur": 7,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 991,
+     "click": false
+    },
+    {
+     "t": 3.2,
+     "x": 973,
+     "y": 557,
+     "click": true
+    },
+    {
+     "t": 6.2,
+     "x": 973,
+     "y": 557,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "12a.png",
+  "dur": 7
+ },
+ {
+  "slide": "12b.png",
+  "dur": 6
+ },
+ {
+  "slide": "13a.png",
+  "dur": 6
+ },
+ {
+  "slide": "13b.png",
+  "dur": 6
+ },
+ {
+  "slide": "14.png",
+  "dur": 6
+ },
+ {
+  "slide": "15.png",
+  "dur": 6
+ },
+ {
+  "slide": "16.png",
+  "dur": 9,
+  "motion": {
+   "slide": "16.png",
+   "dur": 9,
+   "zoom": 1.459,
+   "cx": 1920,
+   "cy": 1866
+  }
+ },
+ {
+  "slide": "17.png",
+  "dur": 5
+ }
+]

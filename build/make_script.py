@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Regenerate video/script.md (storyboard + running narration) from build/scenes.json,
 so the script and the rendered slides can never drift apart."""
-import json, os
+import json, os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sc = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
+SCENES = sys.argv[sys.argv.index('--scenes') + 1] if '--scenes' in sys.argv else 'scenes.json'
+STEM = os.path.splitext(os.path.basename(SCENES))[0]
+SCRIPT = 'script.md' if STEM == 'scenes' else STEM.replace('scenes-', '') + '-script.md'
+sc = json.load(open(os.path.join(ROOT, 'build', SCENES), encoding='utf-8'))
 
 def visual(s):
     t = s['type']
@@ -75,5 +78,5 @@ out = f"""<div dir="rtl">
 
 </div>
 """
-open(os.path.join(ROOT, 'video', 'script.md'), 'w', encoding='utf-8').write(out)
+open(os.path.join(ROOT, 'video', SCRIPT), 'w', encoding='utf-8').write(out)
 print(f'wrote video/script.md — {len(sc)} scenes, {total}s')

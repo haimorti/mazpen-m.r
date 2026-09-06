@@ -30,6 +30,11 @@ if not chrome:
 from PIL import Image
 
 scenes = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
+inv = json.load(open(os.path.join(ROOT, 'build', 'scenes-invoice.json'), encoding='utf-8'))
+inv_by = {s['img']: s for s in inv if s.get('img')}
+inv_zones = next(s for s in inv if s['type'] == 'zones')
+inv_fork = next(s for s in inv if s['type'] == 'fork')
+inv_walks = [s for s in inv if s['type'] == 'walk']
 by_img = {s['img']: s for s in scenes if s.get('img')}
 zone_frames = [s for s in scenes if s['type'] == 'zones' and s.get('active')]
 statuses = next(s for s in scenes if s['type'] == 'statuslist')
@@ -71,8 +76,19 @@ def uri(im, width=1500):
     return 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode()
 
 
-def shot(name, keep=None, keepx=None):
+def ink_bbox(im, thr=246, pad=8):
+    dark = im.convert('L').point(lambda v: 255 if v < thr else 0)
+    bb = dark.getbbox()
+    if not bb:
+        return (0, 0, im.width, im.height)
+    return (max(0, bb[0] - pad), max(0, bb[1] - pad),
+            min(im.width, bb[2] + pad), min(im.height, bb[3] + pad))
+
+
+def shot(name, keep=None, keepx=None, trim=False):
     im = load(name)
+    if trim:
+        im = im.crop(ink_bbox(im))
     if keep or keepx:
         im = im.crop((0, 0, int(im.width * (keepx or 1.0)), int(im.height * (keep or 1.0))))
     return im
@@ -82,7 +98,7 @@ MOBILE = False          # set per build; a phone page needs the region, not the 
 
 
 def figure(name, keep=None, keepx=None, boxes=(), caption=None, width=1500,
-           mzoom=None, msplit=False):
+           mzoom=None, msplit=False, trim=False):
     """A screenshot with the same overlay boxes the video draws, plus a caption.
 
     On the phone page a full screen shrinks to the point of being useless, so a
@@ -90,7 +106,7 @@ def figure(name, keep=None, keepx=None, boxes=(), caption=None, width=1500,
     (msplit). Neither applies on the A4 page, where the whole screen fits."""
     cap = f"<figcaption>{caption}</figcaption>" if caption else ''
     if MOBILE and (mzoom or msplit):
-        im = shot(name, keep, keepx)
+        im = shot(name, keep, keepx, trim)
         if msplit:
             parts = [im.crop((0, 0, im.width, int(im.height * 0.53))),
                      im.crop((0, int(im.height * 0.47), im.width, im.height))]
@@ -107,7 +123,7 @@ def figure(name, keep=None, keepx=None, boxes=(), caption=None, width=1500,
         f"width:{b['box']['w']}%;height:{b['box']['h']}%'>"
         + (f"<i>{b['n']}</i>" if b.get('n') else '') + "</span>"
         for b in boxes)
-    return (f"<figure><div class='shotwrap'><img src='{uri(shot(name, keep, keepx), width)}' alt=''>"
+    return (f"<figure><div class='shotwrap'><img src='{uri(shot(name, keep, keepx, trim), width)}' alt=''>"
             f"{ov}</div>{cap}</figure>")
 
 
@@ -207,6 +223,10 @@ def body_html():
         f"<tr><td><span class='pill' style='--c:{i['color']};--b:{i['bg']}'>{esc(i['key'])}</span></td>"
         f"<td>{esc(i['note'].split(': ', 1)[1])}</td></tr>" for i in statuses['items'])
     walk_rows = ''.join(f"<li>{esc(s['cap'])}</li>" for s in walk['steps'][1:])
+    inv_routes = ''.join(
+        f"<div class='route' style='--c:{c['color']}'>"
+        f"<img src='{crop_box(c['img'], c['btn_box'])}' alt=''>"
+        f"<p>{c['said']}. {esc(c['dest'])}.</p></div>" for c in inv_fork['cols'])
     routes = ''.join(
         f"<div class='route' style='--c:{c['color']}'>"
         f"<img src='{crop_box(c['img'], c['btn_box'])}' alt=''>"
@@ -283,7 +303,46 @@ def body_html():
 </section>
 
 <section>
-  <h2><span class="num">9</span> אחרי שהגשת</h2>
+  <h2><span class="num">9</span> איך מגישים חשבונית או קבלה</h2>
+  <p>{esc(inv_zones['cap'])}</p>
+  {figure('27-main-screen-rm.png', keep=0.928, boxes=inv_zones['zones'],
+          caption='1 — הדרך המועדפת. 2 — רק אם ההטבה לא מופיעה למעלה.')}
+  <h3>הדרך המועדפת: דרך "ההטבות שלי"</h3>
+  <ol class="steps">
+    <li>לוחצים על ההטבה שעבורה יש לך חשבונית.</li>
+    <li>בדף ההטבה לוחצים על <b>פרטים נוספים</b>.</li>
+    <li>בתמונה המלאה לוחצים על הכפתור הכחול
+        <b>+ להגשת חשבונית / קבלה חדשה</b>.</li>
+  </ol>
+  {figure('25-benefit-details-rg.png', trim=True,
+          mzoom={'y': 0.50, 'h': 0.28},
+          caption='הכפתור הכחול יושב מעל "בקשות להחזר".')}
+  <h3>אם ההטבה לא מופיעה ב"ההטבות שלי"</h3>
+  <p>מחפשים אותה בהטבות הפוטנציאליות. {esc(inv_fork['hint'])}</p>
+  <div class="routes">{inv_routes}</div>
+</section>
+
+<section>
+  <h2><span class="num">10</span> שלושת שלבי הטופס</h2>
+  <p>משתי הדרכים מגיעים לאותו טופס.</p>
+  <h3>שלב 1 — פרטי ההטבה</h3>
+  <p>רק בודקים שהפרטים נכונים ולוחצים <b>הבא</b>.</p>
+  <h3>שלב 2 — צירוף החשבונית ופרטיה</h3>
+  <p>גוררים את קובץ החשבונית לתוך המסגרת, או לוחצים <b>בחר קובץ</b>. אחר כך ממלאים
+     לפי החשבונית: מספר, תאריך וסכום כולל מע״מ. מספר מזהה ספק, תקופה וכמות — לפי הצורך.</p>
+  {figure('30-form-step2-filled.png', trim=True, mzoom={'y': 0.40, 'h': 0.45},
+          caption='כך נראה השלב אחרי שהקובץ צורף והפרטים מולאו. '
+                  '"+ הוסף חשבונית" מוסיף עוד חשבונית לאותה בקשה.')}
+  <h3>שלב 3 — הצהרה וחתימה</h3>
+  <p>{esc(inv_walks[1]['steps'][0]['cap'])} {esc(inv_walks[1]['steps'][1]['cap'])}</p>
+  {figure('31-form-step3.png', trim=True, mzoom={'y': 0.60, 'h': 0.40},
+          caption='החתימה נעשית בעכבר במחשב, או באצבע בטלפון.')}
+  <div class="note"><b>הגשת בקשה אינה אישור אוטומטי לקבלת ההטבה.</b>
+    הזכאות תיבדק לפי הקריטריונים שנקבעו בחוק ובהתאם למסמכים שהוגשו.</div>
+</section>
+
+<section>
+  <h2><span class="num">11</span> אחרי שהגשת</h2>
   <p>{esc(after['lead'])}</p>
   <ul class="pts">{''.join(f'<li>{esc(p)}</li>' for p in after['points'])}</ul>
   {figure('05-form-confirmation.png', caption=esc(confirm['cap']))}
