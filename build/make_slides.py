@@ -149,6 +149,17 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .stxt p{margin:0;font-size:27px;line-height:1.35}
 .stxt .sdo{color:#4A5C70;font-size:24px;margin-top:4px}
 .stxt .sdo b{color:#16202B}
+.cmp{position:absolute;top:124px;right:60px;left:60px;bottom:40px;display:flex;flex-direction:column;gap:20px;
+  justify-content:center}
+.chint{font-size:32px;font-weight:700;color:#16202B;text-align:center}
+.crow{border-radius:16px;border:3px solid var(--c);background:#fff;padding:16px 18px;display:flex;
+  flex-direction:column;gap:10px;box-shadow:0 6px 22px rgba(20,34,54,.10)}
+.chead{display:flex;align-items:baseline;gap:16px}
+.cname{background:var(--c);color:#fff;border-radius:10px;padding:6px 18px;font-family:'Rubik';font-weight:600;font-size:28px}
+.cgoes{color:var(--c);font-size:27px;font-weight:700}
+.cshot{position:relative;line-height:0;border-radius:10px;overflow:hidden}
+.cshot img{display:block;width:100%;max-width:none;max-height:none;height:auto}
+.cnote{font-size:26px;color:#3C4C60;line-height:1.35}
 .pair{position:absolute;top:132px;right:56px;left:56px;bottom:60px;display:flex;gap:44px;align-items:center}
 .pcol{flex:1;display:flex;flex-direction:column;gap:18px;align-items:center}
 .ptag{background:var(--c);color:#fff;border-radius:12px;padding:10px 30px;font-family:'Rubik';font-weight:600;font-size:34px}
@@ -272,6 +283,28 @@ def render(scene, total, step=None):
                      + "</div>" for f in scene['fields'])
         note = f"<div class='pt' style='margin-top:34px'><i>!</i><span>{esc(scene['note'])}</span></div>" if scene.get('note') else ''
         body = head + f"<div class='body'>{lead}<div class='fields'>{fl}</div>{note}</div>"
+    elif t == 'compare':
+        rows = []
+        for r in scene['rows']:
+            im = load_shot(r['img'])
+            b = r['box']
+            w, h = im.size
+            im = im.crop((int(b['x'] * w), int(b['y'] * h),
+                          int((b['x'] + b['w']) * w), int((b['y'] + b['h']) * h)))
+            tw = 1690
+            if im.width < tw:
+                im = im.resize((tw, round(im.height * tw / im.width)), Image.LANCZOS)
+            hl = r.get('highlight')
+            hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
+                      f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+            rows.append(
+                f"<div class='crow' style='--c:{r['color']}'>"
+                f"<div class='chead'><span class='cname'>{esc(r['title'])}</span>"
+                f"<span class='cgoes'>{esc(r['leads'])}</span></div>"
+                f"<div class='cshot'><img src='{to_uri(im)}' alt=''>{hl_div}</div>"
+                f"<div class='cnote'>{esc(r['note'])}</div></div>")
+        body = (head + f"<div class='cmp'><div class='chint'>{esc(scene['hint'])}</div>"
+                + ''.join(rows) + "</div>")
     elif t == 'pair':
         cols = []
         for c in scene['cols']:
