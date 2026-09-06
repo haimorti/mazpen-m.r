@@ -169,7 +169,7 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   border:3px solid var(--zc);border-radius:10px;color:var(--zc);font-size:22px;font-weight:700;line-height:1.25;
   padding:8px 14px;text-align:right;white-space:normal}
 .slist{position:absolute;top:116px;right:56px;left:56px;bottom:34px;display:flex;flex-direction:column;
-  align-items:center;gap:14px}
+  align-items:center;justify-content:center;gap:18px}
 .snote{font-size:29px;font-weight:700;color:#16202B;text-align:center;line-height:1.35;min-height:82px;max-width:1600px;display:flex;align-items:center;justify-content:center}
 .scards{display:flex;gap:14px;width:100%}
 .scard{flex:1;background:#fff;border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;
@@ -428,8 +428,8 @@ def render(scene, total, step=None):
             hl = cur.get('on_screen')
             hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
                       f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
-            sh = 650
-            sw = round(sh * im.width / im.height)
+            sw = round(min(MAX_W, im.width * 1.3, 650 * im.width / im.height))
+            sh = round(sw * im.height / im.width)
             cards = ''.join(
                 "<div class='scard" + (' lit' if act == i + 1 else ' dim') + "'>"
                 f"<span class='spill' style='--c:{r['color']};--b:{r['bg']}'>{esc(r['key'])}</span>"

@@ -75,10 +75,6 @@
  },
  {
   "slide": "08.png",
-  "dur": 7
- },
- {
-  "slide": "09.png",
   "dur": 9,
   "motion": {
    "cursor": [
@@ -90,20 +86,70 @@
     },
     {
      "t": 3.0,
-     "x": 1261,
-     "y": 644,
+     "x": 1291,
+     "y": 389,
      "click": true
     },
     {
      "t": 5.4,
-     "x": 1107,
-     "y": 707,
+     "x": 578,
+     "y": 521,
      "click": true
     },
     {
      "t": 8.0,
-     "x": 1107,
-     "y": 707,
+     "x": 578,
+     "y": 521,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
+  "slide": "09a.png",
+  "dur": 8
+ },
+ {
+  "slide": "09b.png",
+  "dur": 3.6
+ },
+ {
+  "slide": "09c.png",
+  "dur": 3.6
+ },
+ {
+  "slide": "09d.png",
+  "dur": 3.6
+ },
+ {
+  "slide": "09e.png",
+  "dur": 3.6
+ },
+ {
+  "slide": "09f.png",
+  "dur": 3.6
+ },
+ {
+  "slide": "09g.png",
+  "dur": 7,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 960,
+     "y": 875,
+     "click": false
+    },
+    {
+     "t": 3.2,
+     "x": 405,
+     "y": 750,
+     "click": true
+    },
+    {
+     "t": 6.2,
+     "x": 405,
+     "y": 750,
      "click": false
     }
    ]
@@ -111,76 +157,26 @@
  },
  {
   "slide": "10a.png",
-  "dur": 8
- },
- {
-  "slide": "10b.png",
-  "dur": 3.6
- },
- {
-  "slide": "10c.png",
-  "dur": 3.6
- },
- {
-  "slide": "10d.png",
-  "dur": 3.6
- },
- {
-  "slide": "10e.png",
-  "dur": 3.6
- },
- {
-  "slide": "10f.png",
-  "dur": 3.6
- },
- {
-  "slide": "10g.png",
-  "dur": 7,
-  "motion": {
-   "cursor": [
-    {
-     "t": 0.0,
-     "x": 960,
-     "y": 991,
-     "click": false
-    },
-    {
-     "t": 3.2,
-     "x": 503,
-     "y": 607,
-     "click": true
-    },
-    {
-     "t": 6.2,
-     "x": 503,
-     "y": 607,
-     "click": false
-    }
-   ]
-  }
- },
- {
-  "slide": "11a.png",
   "dur": 5
  },
  {
-  "slide": "11b.png",
+  "slide": "10b.png",
   "dur": 8
  },
  {
-  "slide": "11c.png",
+  "slide": "10c.png",
   "dur": 6
  },
  {
-  "slide": "11d.png",
+  "slide": "10d.png",
   "dur": 6
  },
  {
-  "slide": "11e.png",
+  "slide": "10e.png",
   "dur": 10
  },
  {
-  "slide": "12.png",
+  "slide": "11.png",
   "dur": 11,
   "motion": {
    "cursor": [
@@ -192,31 +188,31 @@
     },
     {
      "t": 3.4,
-     "x": 1235,
-     "y": 823,
+     "x": 1217,
+     "y": 633,
      "click": true
     },
     {
      "t": 6.4,
-     "x": 1253,
-     "y": 888,
+     "x": 1080,
+     "y": 695,
      "click": true
     },
     {
      "t": 10.2,
-     "x": 1253,
-     "y": 888,
+     "x": 1080,
+     "y": 695,
      "click": false
     }
    ]
   }
  },
  {
-  "slide": "13.png",
+  "slide": "12.png",
   "dur": 11
  },
  {
-  "slide": "14a.png",
+  "slide": "13a.png",
   "dur": 4,
   "motion": {
    "cursor": [
@@ -240,7 +236,7 @@
   }
  },
  {
-  "slide": "14b.png",
+  "slide": "13b.png",
   "dur": 3,
   "motion": {
    "cursor": [
@@ -258,7 +254,7 @@
   }
  },
  {
-  "slide": "14c.png",
+  "slide": "13c.png",
   "dur": 4,
   "motion": {
    "cursor": [
@@ -282,7 +278,7 @@
   }
  },
  {
-  "slide": "14d.png",
+  "slide": "13d.png",
   "dur": 3,
   "motion": {
    "cursor": [
@@ -300,15 +296,15 @@
   }
  },
  {
-  "slide": "15.png",
+  "slide": "14.png",
   "dur": 7
  },
  {
-  "slide": "16.png",
+  "slide": "15.png",
   "dur": 10
  },
  {
-  "slide": "17.png",
+  "slide": "16.png",
   "dur": 5
  }
 ]
