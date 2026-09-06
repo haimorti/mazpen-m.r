@@ -89,7 +89,7 @@ def spotlight(im, band, dim=0.45, blur=6):
 
 
 MAX_W, MAX_H, MAX_UPSCALE = 1792, 700, 1.25
-BIG_H, BIG_UPSCALE = 790, 1.45          # scenes marked "big": slim caption, taller stage
+BIG_H, BIG_UPSCALE = 750, 1.45          # scenes marked "big": slim caption, taller stage
 
 
 def fit(im, big=False):
@@ -105,7 +105,7 @@ def cursor_track(scene, waypoints, big=False):
     """Fractional waypoints on the screenshot -> pixels on the 1920x1080 slide."""
     im = shot_im(scene)
     dw, dh = fit(im, big)                      # same size the slide renders it at
-    left, top = (1920 - dw) / 2, 132 + ((802 if big else stage_h(scene)) - dh) / 2
+    left, top = (1920 - dw) / 2, 132 + ((762 if big else stage_h(scene)) - dh) / 2
     return {'cursor': [{'t': w['t'], 'x': round(left + w['x'] * dw),
                         'y': round(top + w['y'] * dh), 'click': bool(w.get('click'))}
                        for w in waypoints]}
@@ -113,7 +113,7 @@ def cursor_track(scene, waypoints, big=False):
 
 def stage_h(scene):
     """Logical height of the stage box, which the cursor track has to agree with."""
-    return 802 if scene.get('big') else 712
+    return 762 if scene.get('big') else 712
 
 
 def ink_bbox(im, thr=246, pad=8):
@@ -244,8 +244,8 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .shot img{display:block;width:100%;max-width:none;max-height:none;height:auto}
 .hl{position:absolute;border:5px solid #DC2626;border-radius:10px;
   box-shadow:0 0 0 5px rgba(220,38,38,.16)}
-.stage.tall{bottom:150px}
-.cap.slim{bottom:56px;min-height:70px;font-size:32px;padding:14px 34px}
+.stage.tall{bottom:186px}
+.cap.slim{bottom:52px;min-height:106px;font-size:32px;padding:14px 34px}
 .cap{position:absolute;right:64px;left:64px;bottom:60px;min-height:120px;background:#16202B;color:#fff;
   border-radius:16px;padding:24px 40px;font-size:38px;line-height:1.4;display:flex;flex-direction:column;
   justify-content:center;gap:8px}

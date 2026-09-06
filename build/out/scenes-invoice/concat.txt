@@ -26,12 +26,8 @@ file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/09c.png'
 duration 4
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/09d.png'
 duration 3.5
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/10a.png'
-duration 4.0
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/10b.png'
-duration 4.0
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/10c.png'
-duration 4.0
+file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/10.png'
+duration 6
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/11.png'
 duration 7
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/12.png'
