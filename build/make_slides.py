@@ -83,13 +83,32 @@ def spotlight(im, band, dim=0.45, blur=6):
 
 
 MAX_W, MAX_H, MAX_UPSCALE = 1792, 700, 1.25
+BIG_H, BIG_UPSCALE = 790, 1.45          # scenes marked "big": slim caption, taller stage
 
 
-def fit(im):
+def fit(im, big=False):
     """Display size for a screenshot: fits the stage, and never enlarges the source
-    by more than a quarter, so nothing looks stretched or soft."""
-    w = min(MAX_W, im.width * MAX_UPSCALE, im.width * MAX_H / im.height)
+    by more than a quarter, so nothing looks stretched or soft. A "big" scene trades
+    caption height for stage height, so a dense screen reads at close to 1:1."""
+    mh, mu = (BIG_H, BIG_UPSCALE) if big else (MAX_H, MAX_UPSCALE)
+    w = min(MAX_W, im.width * mu, im.width * mh / im.height)
     return round(w), round(w * im.height / im.width)
+
+
+def stage_h(scene):
+    """Logical height of the stage box, which the cursor track has to agree with."""
+    return 802 if scene.get('big') else 712
+
+
+def shot_im(scene):
+    """The screenshot exactly as the slide shows it: cropped, but not yet spotlit."""
+    im = load_shot(scene['img'])
+    if scene.get('keep'):
+        im = im.crop((0, 0, im.width, int(im.height * scene['keep'])))
+    elif scene.get('crop'):
+        k = int(im.height * 0.55)
+        im = im.crop((0, 0, im.width, k) if scene['crop'] == 'top' else (0, im.height - k, im.width, im.height))
+    return im
 
 
 def shot_uri(name, crop=None, zoom=None):
@@ -196,6 +215,8 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .shot img{display:block;width:100%;max-width:none;max-height:none;height:auto}
 .hl{position:absolute;border:5px solid #DC2626;border-radius:10px;
   box-shadow:0 0 0 5px rgba(220,38,38,.16)}
+.stage.tall{bottom:150px}
+.cap.slim{bottom:56px;min-height:70px;font-size:32px;padding:14px 34px}
 .cap{position:absolute;right:64px;left:64px;bottom:60px;min-height:120px;background:#16202B;color:#fff;
   border-radius:16px;padding:24px 40px;font-size:38px;line-height:1.4;display:flex;flex-direction:column;
   justify-content:center;gap:8px}
@@ -366,14 +387,21 @@ def render(scene, total, step=None):
         body = head + f"<div class='pair'>{''.join(cols)}</div>"
     elif t == 'walk':
         st = scene['steps'][scene.get('_step', 0)]
-        im = spotlight(load_shot(scene['img']), st['focus'], dim=0.42, blur=6)
-        sw, sh = fit(im)
+        big = bool(scene.get('big'))
+        im = shot_im(scene)
+        if st.get('focus'):
+            im = spotlight(im, st['focus'], dim=0.42, blur=6)
+        sw, sh = fit(im, big)
         hl = st.get('highlight')
         hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
                   f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
-        body = (head + f"<div class='stage'><div class='frame'><div class='shot' style='width:{sw}px'>"
+        cap = esc(st['cap'])
+        if st.get('cap_title'):
+            cap = f"<div class='ct'>{esc(st['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
+        body = (head + f"<div class='stage{' tall' if big else ''}'><div class='frame'>"
+                f"<div class='shot' style='width:{sw}px'>"
                 f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
-                f"<div class='cap'>{esc(st['cap'])}</div>")
+                f"<div class='cap{' slim' if big else ''}'>{esc(st['cap'])}</div>")
     elif t == 'statuslist':
         im = load_shot(scene['img'])
         act = scene.get('_lit')
@@ -381,21 +409,22 @@ def render(scene, total, step=None):
         hl = cur.get('on_screen') if cur else None
         hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
                   f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
-        sh = 540
+        sh = 690
         sw = round(sh * im.width / im.height)
         cards = ''.join(
             "<div class='scard" + (' lit' if act == i + 1 else (' dim' if act else '')) + "'>"
             f"<span class='spill' style='--c:{r['color']};--b:{r['bg']}'>{esc(r['key'])}</span>"
             f"<p>{esc(r['short'])}</p></div>"
             for i, r in enumerate(scene['items']))
-        note = (f"<div class='snote'>{esc(cur['note'])}</div>"
-                if cur and cur.get('note') else "<div class='snote'>&nbsp;</div>")
+        lead = cur['note'] if cur and cur.get('note') else scene.get('intro')
+        note = (f"<div class='snote'>{esc(lead)}</div>" if lead
+                else "<div class='snote'>&nbsp;</div>")
         body = (head + "<div class='slist'>"
                 f"<div class='frame' style='width:{sw}px'><div class='shot' style='width:{sw}px'>"
                 f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div>"
                 f"{note}<div class='scards'>{cards}</div></div>")
     elif t == 'zones':
-        zim = load_shot(scene['img'])
+        zim = shot_im(scene)
         act = scene.get('active')            # 1-based zone to spotlight; None = show them all
         if act:
             b = [z for z in scene['zones'] if z['n'] == act][0]['box']
@@ -425,22 +454,21 @@ def render(scene, total, step=None):
         body = (head + f"<div class='stage'><div class='frame focus'><img src='{src}' alt=''></div></div>"
                 f"<div class='cap'>{cap}</div>")
     else:  # shot
-        im = load_shot(scene['img'])
-        if scene.get('crop'):
-            keep = int(im.height * 0.55)
-            im = im.crop((0, 0, im.width, keep) if scene['crop'] == 'top'
-                         else (0, im.height - keep, im.width, im.height))
+        big = bool(scene.get('big'))
+        im = shot_im(scene)
         if scene.get('focus'):
             im = spotlight(im, scene['focus'])
-        sw, sh = fit(im)
+        sw, sh = fit(im, big)
         hl = scene.get('highlight')
         hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
                   f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
         cap = esc(scene['cap'])
         if scene.get('cap_title'):
             cap = f"<div class='ct'>{esc(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
-        body = (head + f"<div class='stage'><div class='frame'><div class='shot' style='width:{sw}px'>"
-                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div><div class='cap'>{cap}</div>")
+        body = (head + f"<div class='stage{' tall' if big else ''}'><div class='frame'>"
+                f"<div class='shot' style='width:{sw}px'>"
+                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
+                f"<div class='cap{' slim' if big else ''}'>{cap}</div>")
 
     tag = f"{n:02d}" if step is None else f"{n:02d}{chr(97 + step)}"
     hpath = os.path.join(SLIDES, f"{tag}.html")
@@ -481,10 +509,11 @@ for idx, s in enumerate(scenes):
             frames.append((fp, fr['dur'], {'cursor': fr['cursor']}))
         p = fp
     elif s['type'] == 'statuslist':
-        n_steps = len(s['items'])
-        share = s['dur'] / n_steps
-        for k in range(n_steps):
-            s['_lit'] = k + 1
+        # an optional opening frame says what the screen is, before any status is called out
+        lits = ([None] if s.get('intro') else []) + list(range(1, len(s['items']) + 1))
+        share = s['dur'] / len(lits)
+        for k, lit in enumerate(lits):
+            s['_lit'] = lit
             fp = render(s, total, step=k)
             frames.append((fp, share, None))
         p = fp
@@ -503,13 +532,9 @@ for idx, s in enumerate(scenes):
     print('rendered', os.path.basename(p))
     m = None
     if s.get('cursor') and s.get('img'):
-        im = load_shot(s['img'])
-        if s.get('crop'):
-            keep = int(im.height * 0.55)
-            im = im.crop((0, 0, im.width, keep) if s['crop'] == 'top'
-                         else (0, im.height - keep, im.width, im.height))
-        dw, dh = fit(im)                       # same size the slide renders it at
-        left, top = (1920 - dw) / 2, 132 + (712 - dh) / 2
+        im = shot_im(s)
+        dw, dh = fit(im, s.get('big'))         # same size the slide renders it at
+        left, top = (1920 - dw) / 2, 132 + (stage_h(s) - dh) / 2
         m = {'cursor': [{'t': w['t'],
                          'x': round(left + w['x'] * dw), 'y': round(top + w['y'] * dh),
                          'click': bool(w.get('click'))} for w in s['cursor']]}
