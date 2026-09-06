@@ -381,9 +381,26 @@ def general_html():
 # ---------------------------------------------------------------- guide B: submitting
 def invoice_html():
     _faq.clear()
+    inv_points = next(x for x in inv if x['type'] == 'points' and 'lead' in x
+                      and 'המצפן' in x['lead'])
+    inv_why = ''.join(f'<li>{esc(p)}</li>' for p in inv_points['points'])
     return cover('הגשת חשבונית או קבלה', 'במצפן זכויות איבה') + f"""
 <section>
-  <h2><span class="num">1</span> שתי דרכים להגיע לטופס</h2>
+  <h2><span class="num">1</span> לפני שמתחילים</h2>
+  <p>המדריך מראה איך מגישים חשבונית או קבלה להחזר דרך מצפן זכויות איבה —
+     מהרגע שנכנסים ועד ההודעה שהבקשה נקלטה.</p>
+  <h3>למה דווקא דרך המצפן</h3>
+  <ul class="pts">{inv_why}</ul>
+  <h3>מה כדאי שיהיה מוכן</h3>
+  <ol class="steps">
+    <li>קובץ סרוק או מצולם של חשבונית המס או הקבלה שברשותך.</li>
+    <li>כניסה למצפן: מהאזור האישי באתר הביטוח הלאומי, <b>מצפן הזכויות שלי</b> ←
+        <b>כניסה למצפן הזכויות</b> ← הכפתור הכחול.</li>
+  </ol>
+</section>
+
+<section>
+  <h2><span class="num">2</span> שתי דרכים להגיע לטופס</h2>
   <p>{esc(inv_zones['cap'])}</p>
   {figure('27-main-screen-rm.png', keep=0.928, boxes=inv_zones['zones'],
           caption='1 — הדרך המועדפת. 2 — רק אם ההטבה לא מופיעה למעלה.')}
@@ -403,7 +420,7 @@ def invoice_html():
 </section>
 
 <section>
-  <h2><span class="num">2</span> אם ההטבה לא מופיעה ב"ההטבות שלי"</h2>
+  <h2><span class="num">3</span> אם ההטבה לא מופיעה ב"ההטבות שלי"</h2>
   <p>מחפשים אותה בהטבות הפוטנציאליות. שימו לב: בשלב זה עדיין לא כל ההטבות
      הפוטנציאליות פתוחות להגשת חשבוניות דרך המצפן. {esc(inv_fork['hint'])}</p>
   <div class="routes">{routes(inv_fork)}</div>
@@ -412,7 +429,7 @@ def invoice_html():
 </section>
 
 <section>
-  <h2><span class="num">3</span> שלושת שלבי הטופס</h2>
+  <h2><span class="num">4</span> שלושת שלבי הטופס</h2>
   <p>משתי הדרכים מגיעים לאותו טופס.</p>
   <h3>שלב 1 — פרטי ההטבה</h3>
   <p>רק בודקים שהפרטים נכונים ולוחצים <b>הבא</b>.</p>
@@ -443,7 +460,7 @@ def invoice_html():
 </section>
 
 <section>
-  <h2><span class="num">4</span> אחרי השליחה</h2>
+  <h2><span class="num">5</span> אחרי השליחה</h2>
   <p>{esc(inv_sent['cap'])}</p>
   {figure('32-invoice-confirmation.png', trim=True,
           caption='מסך האישור שמופיע בסוף התהליך.')}
@@ -458,7 +475,7 @@ def invoice_html():
 </section>
 
 <section>
-  <h2><span class="num">5</span> איך עוקבים</h2>
+  <h2><span class="num">6</span> איך עוקבים</h2>
   <p>הבקשה מופיעה בדף ההטבה תחת "בקשות להחזר", עם התאריך, הסכום, סטטוס הטיפול בה,
      ואפשרות לפתוח את הקבלה עצמה. כאן בודקים אם קבלה שולמה.</p>
   {figure('25-benefit-details-rg.png', trim=True, mzoom={'y': 0.58, 'h': 0.42},
@@ -467,7 +484,7 @@ def invoice_html():
        ('אפשר לראות את הקבלה שהגשתי?',
         'כן. באזור "בקשות להחזר", ליד כל חשבונית יש סמל הורדה.'))}
 </section>
-{faq_section(6)}
+{faq_section(7)}
 """
 
 
