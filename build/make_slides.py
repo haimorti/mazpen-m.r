@@ -116,6 +116,20 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .frame{max-width:100%;max-height:100%;background:#fff;border-radius:16px;
   box-shadow:0 2px 4px rgba(20,34,54,.06),0 18px 50px rgba(20,34,54,.14);overflow:hidden;line-height:0}
 .frame img{display:block;max-width:1792px;max-height:700px;width:auto;height:auto}
+.zwrap{position:relative;line-height:0}
+.zwrap img{display:block;width:100%;max-width:none;max-height:none;height:auto}
+.zback.dim{filter:blur(7px) brightness(.55) saturate(.5)}
+.zband{position:absolute;right:0;left:0;overflow:hidden}
+.zband img{position:relative}
+.zbox{position:absolute;border:5px solid var(--zc);border-radius:12px;box-shadow:0 0 0 4px rgba(255,255,255,.55)}
+.zn{position:absolute;top:50%;right:-30px;transform:translate(50%,-50%);width:52px;height:52px;border-radius:50%;
+  background:#fff;border:5px solid var(--zc);color:var(--zc);font-family:'Rubik';font-weight:700;font-size:28px;
+  display:grid;place-items:center;line-height:1}
+.zlab.out{left:auto;right:calc(100% + 14px);max-width:none;width:320px;font-size:21px}
+.zlab.top{top:14px;transform:none}
+.zlab{position:absolute;top:50%;left:12px;transform:translateY(-50%);max-width:42%;background:#fff;
+  border:3px solid var(--zc);border-radius:10px;color:var(--zc);font-size:22px;font-weight:700;line-height:1.25;
+  padding:8px 14px;text-align:right;white-space:normal}
 .shot{position:relative;display:inline-block;line-height:0}
 .frame.focus{width:1792px}
 .frame.focus img{width:100%;max-width:none;max-height:none;height:auto}
@@ -131,8 +145,8 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .cap .bul::before{content:'\\2022';color:#9EC5EE;flex:none}
 
 .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:40px;padding:0 200px;text-align:center}
-.center img{height:140px}
+  gap:24px;padding:0 200px;text-align:center}
+.mark{position:absolute;top:64px;right:80px;height:110px}
 .center h1{font-family:'Rubik';font-weight:700;font-size:100px;margin:0;color:#14477E;line-height:1.1;letter-spacing:-.02em}
 .center .sub{font-size:44px;color:#4A5C70;font-weight:600}
 
@@ -192,8 +206,9 @@ def render(scene, total):
     head = f"<div class='top'><span class='t'>{esc(scene.get('title',''))}</span>{k}</div>"
 
     if t == 'title':
-        body = (f"<div class='center'><img src='{LOGO}' alt=''>"
-                f"<h1>{esc(scene['title'])}</h1><div class='sub'>{esc(scene['sub'])}</div></div>")
+        body = (f"<img class='mark' src='{LOGO}' alt=''>"
+                f"<div class='center'><h1>{esc(scene['title'])}</h1>"
+                f"<div class='sub'>{esc(scene['sub'])}</div></div>")
     elif t == 'points':
         hero = f"<h1 class='hero'>{esc(scene['hero'])}</h1>" if scene.get('hero') else ''
         lead = f"<div class='lead'>{esc(scene['lead'])}</div>" if scene.get('lead') else ''
@@ -228,6 +243,32 @@ def render(scene, total):
                      + "</div>" for f in scene['fields'])
         note = f"<div class='pt' style='margin-top:34px'><i>!</i><span>{esc(scene['note'])}</span></div>" if scene.get('note') else ''
         body = head + f"<div class='body'>{lead}<div class='fields'>{fl}</div>{note}</div>"
+    elif t == 'zones':
+        zim = load_shot(scene['img'])
+        zw = min(1792, round(700 * zim.width / zim.height))   # fit the stage, keep the aspect
+        src = to_uri(zim)
+        zs = scene['zones']
+        act = scene.get('active')            # 1-based zone to spotlight; None = show them all
+        boxes = ''.join(
+            f"<div class='zbox' style='--zc:{z['color']};right:{z['box']['x']}%;top:{z['box']['y']}%;"
+            f"width:{z['box']['w']}%;height:{z['box']['h']}%"
+            + ('' if act is None or act == z['n'] else ';opacity:.18') + "'>"
+            f"<span class='zn'>{z['n']}</span>"
+            + ("<span class='zlab" + z.get('lab', '') + "'>" + esc(z['label']) + "</span>" if z.get('label') else '')
+            + "</div>" for z in zs)
+        band = ''
+        if act:
+            b = [z for z in zs if z['n'] == act][0]['box']
+            pad = 1.2
+            top, hgt = max(0, b['y'] - pad), min(100, b['h'] + pad * 2)
+            band = (f"<div class='zband' style='top:{top}%;height:{hgt}%'>"
+                    f"<img src='{src}' style='margin-top:-{top / hgt * 100}%' alt=''></div>")
+        cap = esc(scene['cap'])
+        if scene.get('cap_title'):
+            cap = f"<div class='ct'>{esc(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
+        body = (head + f"<div class='stage'><div class='frame zwrap' style='width:{zw}px'>"
+                f"<img class='zback{' dim' if act else ''}' src='{src}' alt=''>{band}{boxes}</div></div>"
+                f"<div class='cap'>{cap}</div>")
     elif t == 'shot' and scene.get('focus'):
         im = load_shot(scene['img'])
         src = to_uri(spotlight(im, scene['focus']))
@@ -276,7 +317,16 @@ for idx, s in enumerate(scenes):
     p = render(s, total)
     print('rendered', os.path.basename(p))
     m = None
-    if s.get('focus'):
+    if s.get('cursor'):
+        im = load_shot(s['img'])
+        # the screenshot is laid out to fit 1792x700, centred in the stage (top 132, height 712)
+        sc = min(1792 / im.width, 700 / im.height)
+        dw, dh = im.width * sc, im.height * sc
+        left, top = (1920 - dw) / 2, 132 + (712 - dh) / 2
+        m = {'cursor': [{'t': w['t'],
+                         'x': round(left + w['x'] * dw), 'y': round(top + w['y'] * dh),
+                         'click': bool(w.get('click'))} for w in s['cursor']]}
+    elif s.get('focus'):
         im = load_shot(s['img'])
         disp_h = 1792 * im.height / im.width          # image height at the fixed focus layout
         top = 132 + (712 - disp_h) / 2                # stage box: top 132, height 712
