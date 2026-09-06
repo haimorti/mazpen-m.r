@@ -326,8 +326,10 @@ def render(scene, total, step=None):
         hero = f"<h1 class='hero'>{esc(scene['hero'])}</h1>" if scene.get('hero') else ''
         lead = f"<div class='lead'>{esc(scene['lead'])}</div>" if scene.get('lead') else ''
         shown = scene.get('_shown', len(scene['points']))     # how many bullets are out yet
+        mark = (lambda i: '&#8226;') if scene.get('nonum') else (lambda i: str(i + 1))
         pts = ''.join(
-            f"<div class='pt{' on' if i + 1 == shown else ''}'><i>{i+1}</i><span>{esc(p)}</span></div>"
+            f"<div class='pt{' on' if i + 1 == shown else ''}'><i>{mark(i)}</i>"
+            f"<span>{esc(p)}</span></div>"
             for i, p in enumerate(scene['points']))
         body = head + f"<div class='body'>{hero}{lead}{pts}</div>"
     elif t == 'cards':
@@ -574,7 +576,7 @@ for idx, s in enumerate(scenes):
     m = None
     if s.get('cursor') and s.get('img'):
         m = cursor_track(s, s['cursor'], big=s.get('big'))
-    elif s.get('focus'):
+    elif s.get('focus') and not s.get('static'):
         im = load_shot(s['img'])
         disp_h = 1792 * im.height / im.width          # image height at the fixed focus layout
         top = 132 + (712 - disp_h) / 2                # stage box: top 132, height 712
