@@ -39,8 +39,8 @@ for i, s in enumerate(tl):
         rings = ''.join(
             f"[v{i}][2:v]overlay=x={p['x']}-60:y={p['y']}-60:"
             f"enable='between(t,{p['t']},{p['t']+0.45})'[v{i+1}];"
-            for i, p in enumerate([p for p in w if p['click']]))
-        n_rings = len([p for p in w if p['click']])
+            for i, p in enumerate([p for p in w if p.get('click')]))
+        n_rings = len([p for p in w if p.get('click')])
         fc = (f"[0:v]scale=1920:1080:flags=lanczos,format=yuv420p[bg];"
               f"[bg][1:v]overlay=x='{track('x')}':y='{track('y')}'[v0];"
               + rings.rstrip(';'))

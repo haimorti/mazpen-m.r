@@ -138,6 +138,15 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .zlab{position:absolute;top:50%;left:12px;transform:translateY(-50%);max-width:42%;background:#fff;
   border:3px solid var(--zc);border-radius:10px;color:var(--zc);font-size:22px;font-weight:700;line-height:1.25;
   padding:8px 14px;text-align:right;white-space:normal}
+.slist{position:absolute;top:116px;right:56px;left:56px;bottom:34px;display:flex;flex-direction:column;
+  align-items:center;gap:14px}
+.snote{font-size:29px;font-weight:700;color:#16202B;text-align:center;min-height:40px}
+.scards{display:flex;gap:14px;width:100%}
+.scard{flex:1;background:#fff;border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;
+  align-items:center;gap:8px;box-shadow:0 2px 10px rgba(20,34,54,.07);border:4px solid transparent}
+.scard.dim{opacity:.4}
+.scard.lit{border-color:#DC2626;box-shadow:0 8px 26px rgba(20,34,54,.16)}
+.scard p{margin:0;font-size:24px;line-height:1.3;text-align:center;color:#3C4C60}
 .split{position:absolute;top:126px;right:56px;left:56px;bottom:40px;display:flex;gap:40px;align-items:center}
 .sleg{flex:1;display:flex;flex-direction:column;gap:12px}
 .srow{background:#fff;border-radius:14px;padding:16px 20px;display:flex;gap:18px;align-items:flex-start;
@@ -149,6 +158,22 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .stxt p{margin:0;font-size:27px;line-height:1.35}
 .stxt .sdo{color:#4A5C70;font-size:24px;margin-top:4px}
 .stxt .sdo b{color:#16202B}
+.fhint{position:absolute;top:118px;right:60px;left:60px;text-align:center;font-size:31px;font-weight:700}
+.fcol{position:absolute;top:176px;bottom:34px;width:870px;display:flex;flex-direction:column;align-items:center;gap:0}
+.fcol.right{right:60px}
+.fcol.left{left:60px}
+.fbtn{width:420px;line-height:0;border-radius:12px;overflow:hidden;border:5px solid transparent}
+.fbtn.on{border-color:#DC2626;box-shadow:0 0 0 5px rgba(220,38,38,.20)}
+.fbtn img{display:block;width:100%}
+.fsaid{margin-top:12px;font-size:25px;color:#3C4C60;text-align:center;line-height:1.3;height:64px}
+.fsaid b{color:var(--c)}
+.fdrop{visibility:hidden;flex:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fdrop.show{visibility:visible}
+.farrow{color:var(--c);font-size:40px;font-weight:700;line-height:1}
+.fdest{font-family:'Rubik';font-weight:600;font-size:28px;color:var(--c);text-align:center}
+.fscr{margin-top:6px;flex:1;width:100%;line-height:0;border-radius:10px;overflow:hidden;
+  border:3px solid var(--c);background:#fff}
+.fscr img{display:block;width:100%}
 .cmp{position:absolute;top:124px;right:60px;left:60px;bottom:40px;display:flex;flex-direction:column;gap:20px;
   justify-content:center}
 .chint{font-size:32px;font-weight:700;color:#16202B;text-align:center}
@@ -283,6 +308,29 @@ def render(scene, total, step=None):
                      + "</div>" for f in scene['fields'])
         note = f"<div class='pt' style='margin-top:34px'><i>!</i><span>{esc(scene['note'])}</span></div>" if scene.get('note') else ''
         body = head + f"<div class='body'>{lead}<div class='fields'>{fl}</div>{note}</div>"
+    elif t == 'fork':
+        step = scene.get('_step', 0)
+        cols = []
+        for side, c in zip(('right', 'left'), scene['cols']):
+            im = load_shot(c['img']); w, h = im.size
+            b = c['btn_box']
+            btn = im.crop((int(b['x'] * w), int(b['y'] * h),
+                           int((b['x'] + b['w']) * w), int((b['y'] + b['h']) * h)))
+            if btn.width < 840:
+                btn = btn.resize((840, round(btn.height * 840 / btn.width)), Image.LANCZOS)
+            scr = load_shot(c['screen'])
+            sc_h = c.get('screen_keep', 1.0)
+            scr = scr.crop((0, 0, scr.width, int(scr.height * sc_h)))
+            open_now = step >= c['opens_at']
+            marked = scene['mark'][step] == side
+            cols.append(
+                f"<div class='fcol {side}' style='--c:{c['color']}'>"
+                f"<div class='fbtn{' on' if marked else ''}'><img src='{to_uri(btn)}' alt=''></div>"
+                f"<div class='fsaid'>{c['said']}</div>"
+                f"<div class='fdrop{' show' if open_now else ''}'>"
+                f"<div class='farrow'>&#8595;</div><div class='fdest'>{esc(c['dest'])}</div>"
+                f"<div class='fscr'><img src='{to_uri(scr)}' alt=''></div></div></div>")
+        body = (head + f"<div class='fhint'>{esc(scene['hint'])}</div>" + ''.join(cols))
     elif t == 'compare':
         rows = []
         for r in scene['rows']:
@@ -319,18 +367,24 @@ def render(scene, total, step=None):
         body = head + f"<div class='pair'>{''.join(cols)}</div>"
     elif t == 'statuslist':
         im = load_shot(scene['img'])
-        sw = min(940, round(830 * im.width / im.height))
         act = scene.get('_lit')
-        rows = ''.join(
-            "<div class='srow" + (' lit' if act == i + 1 else (' dim' if act else '')) + "'>"
+        cur = scene['items'][act - 1] if act else None
+        hl = cur.get('on_screen') if cur else None
+        hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
+                  f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+        sh = 540
+        sw = round(sh * im.width / im.height)
+        cards = ''.join(
+            "<div class='scard" + (' lit' if act == i + 1 else (' dim' if act else '')) + "'>"
             f"<span class='spill' style='--c:{r['color']};--b:{r['bg']}'>{esc(r['key'])}</span>"
-            f"<div class='stxt'><p>{esc(r['what'])}</p>"
-            f"<p class='sdo'><b>מה עושים:</b> {esc(r['do'])}</p></div></div>"
+            f"<p>{esc(r['short'])}</p></div>"
             for i, r in enumerate(scene['items']))
-        body = (head + "<div class='split'>"
-                f"<div class='sleg'>{rows}</div>"
-                f"<div class='frame' style='width:{sw}px'><img src='{to_uri(im)}' alt=''></div>"
-                "</div>")
+        note = (f"<div class='snote'>{esc(cur['note'])}</div>"
+                if cur and cur.get('note') else "<div class='snote'>&nbsp;</div>")
+        body = (head + "<div class='slist'>"
+                f"<div class='frame' style='width:{sw}px'><div class='shot' style='width:{sw}px'>"
+                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div>"
+                f"{note}<div class='scards'>{cards}</div></div>")
     elif t == 'zones':
         zim = load_shot(scene['img'])
         act = scene.get('active')            # 1-based zone to spotlight; None = show them all
@@ -402,16 +456,22 @@ def srt_time(s):
 
 scenes = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
 total = len(scenes)
-concat, srt, motion, frames, t = [], [], [], [], 0.0
+concat, srt, frames, t = [], [], [], 0.0
 for idx, s in enumerate(scenes):
     s['n'] = idx + 1
-    if s['type'] == 'statuslist':
+    if s['type'] == 'fork':
+        for k, fr in enumerate(s['frames']):
+            s['_step'] = k
+            fp = render(s, total, step=k)
+            frames.append((fp, fr['dur'], {'cursor': fr['cursor']}))
+        p = fp
+    elif s['type'] == 'statuslist':
         n_steps = len(s['items'])
         share = s['dur'] / n_steps
         for k in range(n_steps):
             s['_lit'] = k + 1
             fp = render(s, total, step=k)
-            frames.append((fp, share))
+            frames.append((fp, share, None))
         p = fp
     elif s['type'] == 'points' and s.get('reveal'):
         # one frame per bullet: the list builds up as the narration reads it out
@@ -420,11 +480,11 @@ for idx, s in enumerate(scenes):
         for k in range(n_steps):
             s['_shown'] = k + 1
             fp = render(s, total, step=k)
-            frames.append((fp, share))
+            frames.append((fp, share, None))
         p = fp
     else:
         p = render(s, total)
-        frames.append((p, s['dur']))
+        frames.append((p, s['dur'], None))
     print('rendered', os.path.basename(p))
     m = None
     if s.get('cursor') and s.get('img'):
@@ -447,23 +507,17 @@ for idx, s in enumerate(scenes):
         z = min(2.6, max(1.25, 712 / (f['h'] * disp_h)))
         m = {'slide': os.path.basename(p), 'dur': s['dur'], 'zoom': round(z, 3),
              'cx': round(960 * SCALE), 'cy': round(cy * SCALE)}
-    motion.append(m)
+    if m:
+        frames[-1] = (frames[-1][0], frames[-1][1], m)
     srt.append(f"{s['n']}\n{srt_time(t + 0.3)} --> {srt_time(t + s['dur'] - 0.3)}\n{s['vo']}\n")
     t += s['dur']
-for fp, d in frames:
+for fp, d, _ in frames:
     concat.append(f"file '{fp}'\nduration {d}")
 concat.append(f"file '{frames[-1][0]}'")  # repeat last frame so its duration is honored
 open(os.path.join(OUT, 'concat.txt'), 'w', encoding='utf-8').write('\n'.join(concat) + '\n')
 open(os.path.join(OUT, 'subtitles.srt'), 'w', encoding='utf-8').write('\n'.join(srt))
-tl = []
-fi = 0
-for i, s in enumerate(scenes):
-    n_f = (len(s['items']) if s['type'] == 'statuslist' else
-           len(s['points']) if s['type'] == 'points' and s.get('reveal') else 1)
-    for _ in range(n_f):
-        fp, d = frames[fi]; fi += 1
-        tl.append({'slide': os.path.basename(fp), 'dur': d,
-                   **({'motion': motion[i]} if motion[i] else {})})
+tl = [{'slide': os.path.basename(fp), 'dur': d, **({'motion': m} if m else {})}
+      for fp, d, m in frames]
 json.dump(tl,
           open(os.path.join(OUT, 'timeline.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(f'total {t:.0f}s, {total} slides at {W*SCALE}x{H*SCALE}')

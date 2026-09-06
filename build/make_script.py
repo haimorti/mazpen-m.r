@@ -13,6 +13,7 @@ def visual(s):
     if t == 'cards':   return 'מסך טקסט, שני כרטיסים זה לצד זה'
     if t == 'flow':    return 'מסך טקסט, שלושה שלבים בשורה'
     if t == 'fields':  return 'מסך טקסט, שדות הטופס'
+    if t == 'fork':     return ' + '.join(c['img'] for c in s['cols']) + ' (כפתור, ומתחתיו המסך שנפתח)'
     if t == 'compare':  return ' + '.join(r['img'] for r in s['rows']) + ' (שורות הכרטיס, מוגדלות)'
     if t == 'pair':    return ' + '.join(c['img'] for c in s['cols']) + ' (זה לצד זה)'
     if t == 'statuslist': return f"{s['img']} + רשימת סטטוסים בצד"
@@ -22,6 +23,7 @@ def visual(s):
     return v
 
 def mark(s):
+    if s['type'] == 'fork': return 'המסגרת והסמן עוברים מאחד לשני, וכל לחיצה פותחת מסך'
     if s['type'] == 'statuslist': return 'כל סטטוס בתורו מודגש ברשימה'
     if s['type'] == 'pair':       return 'הכפתור מסומן בכל אחד מהמסכים'
     if s.get('cursor'):           return 'סמן עכבר נע ולוחץ'
