@@ -113,8 +113,9 @@ def stage_h(scene):
 def shot_im(scene):
     """The screenshot exactly as the slide shows it: cropped, but not yet spotlit."""
     im = load_shot(scene['img'])
-    if scene.get('keep'):
-        im = im.crop((0, 0, im.width, int(im.height * scene['keep'])))
+    if scene.get('keep') or scene.get('keepx'):
+        im = im.crop((0, 0, int(im.width * scene.get('keepx', 1.0)),
+                      int(im.height * scene.get('keep', 1.0))))
     elif scene.get('crop'):
         k = int(im.height * 0.55)
         im = im.crop((0, 0, im.width, k) if scene['crop'] == 'top' else (0, im.height - k, im.width, im.height))
