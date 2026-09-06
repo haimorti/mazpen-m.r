@@ -13,12 +13,18 @@ def visual(s):
     if t == 'cards':   return 'מסך טקסט, שני כרטיסים זה לצד זה'
     if t == 'flow':    return 'מסך טקסט, שלושה שלבים בשורה'
     if t == 'fields':  return 'מסך טקסט, שדות הטופס'
+    if t == 'pair':    return ' + '.join(c['img'] for c in s['cols']) + ' (זה לצד זה)'
+    if t == 'statuslist': return f"{s['img']} + רשימת סטטוסים בצד"
     v = s['img']
     if s.get('zoom'):  return f"{v} (זום על אזור)"
     if s.get('crop'):  return f"{v} (חלק {'עליון' if s['crop']=='top' else 'תחתון'})"
     return v
 
 def mark(s):
+    if s['type'] == 'statuslist': return 'כל סטטוס בתורו מודגש ברשימה'
+    if s['type'] == 'pair':       return 'הכפתור מסומן בכל אחד מהמסכים'
+    if s.get('cursor'):           return 'סמן עכבר נע ולוחץ'
+    if s.get('reveal'):           return 'הסעיפים נחשפים אחד אחרי השני'
     if s.get('highlight'): return 'מסגרת אדומה על האזור הרלוונטי'
     if s.get('zoom'):      return 'הגדלה של האזור הנדון'
     if s.get('cap_title'): return 'ללא סימון'

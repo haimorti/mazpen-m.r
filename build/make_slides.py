@@ -138,6 +138,23 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .zlab{position:absolute;top:50%;left:12px;transform:translateY(-50%);max-width:42%;background:#fff;
   border:3px solid var(--zc);border-radius:10px;color:var(--zc);font-size:22px;font-weight:700;line-height:1.25;
   padding:8px 14px;text-align:right;white-space:normal}
+.split{position:absolute;top:126px;right:56px;left:56px;bottom:40px;display:flex;gap:40px;align-items:center}
+.sleg{flex:1;display:flex;flex-direction:column;gap:12px}
+.srow{background:#fff;border-radius:14px;padding:16px 20px;display:flex;gap:18px;align-items:flex-start;
+  box-shadow:0 2px 10px rgba(20,34,54,.07)}
+.srow.dim{opacity:.42}
+.srow.lit{box-shadow:0 0 0 4px #14477E,0 10px 30px rgba(20,34,54,.18)}
+.spill{flex:none;min-width:150px;text-align:center;background:var(--b);color:var(--c);border-radius:999px;
+  padding:7px 16px;font-weight:700;font-size:27px}
+.stxt p{margin:0;font-size:27px;line-height:1.35}
+.stxt .sdo{color:#4A5C70;font-size:24px;margin-top:4px}
+.stxt .sdo b{color:#16202B}
+.pair{position:absolute;top:132px;right:56px;left:56px;bottom:60px;display:flex;gap:44px;align-items:center}
+.pcol{flex:1;display:flex;flex-direction:column;gap:18px;align-items:center}
+.ptag{background:var(--c);color:#fff;border-radius:12px;padding:10px 30px;font-family:'Rubik';font-weight:600;font-size:34px}
+.plead{color:var(--c);font-size:30px;font-weight:700;text-align:center;line-height:1.3}
+.pcol .frame{width:100%}
+.pcol .shot{width:100%}
 .shot{position:relative;line-height:0}
 .shot img{display:block;width:100%;max-width:none;max-height:none;height:auto}
 .hl{position:absolute;border:5px solid #DC2626;border-radius:10px;
@@ -255,6 +272,32 @@ def render(scene, total, step=None):
                      + "</div>" for f in scene['fields'])
         note = f"<div class='pt' style='margin-top:34px'><i>!</i><span>{esc(scene['note'])}</span></div>" if scene.get('note') else ''
         body = head + f"<div class='body'>{lead}<div class='fields'>{fl}</div>{note}</div>"
+    elif t == 'pair':
+        cols = []
+        for c in scene['cols']:
+            im = load_shot(c['img'])
+            hl = c.get('highlight')
+            hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
+                      f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+            cols.append(
+                f"<div class='pcol'><div class='ptag' style='--c:{c.get('tagcolor', c['color'])}'>{esc(c['btn'])}</div>"
+                f"<div class='frame'><div class='shot'><img src='{to_uri(im)}' alt=''>{hl_div}</div></div>"
+                f"<div class='plead' style='--c:{c['color']}'>{esc(c['leads'])}</div></div>")
+        body = head + f"<div class='pair'>{''.join(cols)}</div>"
+    elif t == 'statuslist':
+        im = load_shot(scene['img'])
+        sw = min(940, round(830 * im.width / im.height))
+        act = scene.get('_lit')
+        rows = ''.join(
+            "<div class='srow" + (' lit' if act == i + 1 else (' dim' if act else '')) + "'>"
+            f"<span class='spill' style='--c:{r['color']};--b:{r['bg']}'>{esc(r['key'])}</span>"
+            f"<div class='stxt'><p>{esc(r['what'])}</p>"
+            f"<p class='sdo'><b>מה עושים:</b> {esc(r['do'])}</p></div></div>"
+            for i, r in enumerate(scene['items']))
+        body = (head + "<div class='split'>"
+                f"<div class='sleg'>{rows}</div>"
+                f"<div class='frame' style='width:{sw}px'><img src='{to_uri(im)}' alt=''></div>"
+                "</div>")
     elif t == 'zones':
         zim = load_shot(scene['img'])
         act = scene.get('active')            # 1-based zone to spotlight; None = show them all
@@ -329,7 +372,15 @@ total = len(scenes)
 concat, srt, motion, frames, t = [], [], [], [], 0.0
 for idx, s in enumerate(scenes):
     s['n'] = idx + 1
-    if s['type'] == 'points' and s.get('reveal'):
+    if s['type'] == 'statuslist':
+        n_steps = len(s['items'])
+        share = s['dur'] / n_steps
+        for k in range(n_steps):
+            s['_lit'] = k + 1
+            fp = render(s, total, step=k)
+            frames.append((fp, share))
+        p = fp
+    elif s['type'] == 'points' and s.get('reveal'):
         # one frame per bullet: the list builds up as the narration reads it out
         n_steps = len(s['points'])
         share = s['dur'] / n_steps
@@ -343,8 +394,12 @@ for idx, s in enumerate(scenes):
         frames.append((p, s['dur']))
     print('rendered', os.path.basename(p))
     m = None
-    if s.get('cursor'):
+    if s.get('cursor') and s.get('img'):
         im = load_shot(s['img'])
+        if s.get('crop'):
+            keep = int(im.height * 0.55)
+            im = im.crop((0, 0, im.width, keep) if s['crop'] == 'top'
+                         else (0, im.height - keep, im.width, im.height))
         dw, dh = fit(im)                       # same size the slide renders it at
         left, top = (1920 - dw) / 2, 132 + (712 - dh) / 2
         m = {'cursor': [{'t': w['t'],
@@ -370,7 +425,8 @@ open(os.path.join(OUT, 'subtitles.srt'), 'w', encoding='utf-8').write('\n'.join(
 tl = []
 fi = 0
 for i, s in enumerate(scenes):
-    n_f = len(s['points']) if s['type'] == 'points' and s.get('reveal') else 1
+    n_f = (len(s['items']) if s['type'] == 'statuslist' else
+           len(s['points']) if s['type'] == 'points' and s.get('reveal') else 1)
     for _ in range(n_f):
         fp, d = frames[fi]; fi += 1
         tl.append({'slide': os.path.basename(fp), 'dur': d,
