@@ -37,6 +37,7 @@ inv_fork = next(s for s in inv if s['type'] == 'fork')
 inv_walks = [s for s in inv if s['type'] == 'walk']
 by_img = {s['img']: s for s in scenes if s.get('img')}
 zone_frames = [s for s in scenes if s['type'] == 'zones' and s.get('active')]
+main_zones = zone_frames[0]
 statuses = next(s for s in scenes if s['type'] == 'statuslist')
 walk = next(s for s in scenes if s['type'] == 'walk')
 fork = next(s for s in scenes if s['type'] == 'fork')
@@ -179,6 +180,14 @@ table.st td:first-child{width:1%;white-space:nowrap;padding-inline-start:0}
 .note{background:#F4F8FC;border-inline-start:4px solid #14477E;border-radius:0 6px 6px 0;
   padding:.7em .9em;margin:.7em 0}
 .note b{color:#14477E}
+.faq{background:#F4F8FC;border-radius:8px;padding:.75em 1em;margin:.9em 0 0;
+  break-inside:avoid}
+.faq h4{font-family:'Rubik';font-weight:700;font-size:.92em;letter-spacing:.04em;
+  color:#5A7691;margin:0 0 .5em}
+.faq dl{margin:0}
+.faq dt{font-weight:700;color:#16202B;margin-top:.7em;line-height:1.45}
+.faq dt:first-of-type{margin-top:0}
+.faq dd{margin:.15em 0 0;color:#3E5164;line-height:1.5}
 .routes{display:flex;flex-direction:column;gap:.8em}
 .route{border:1px solid #D3DDE7;border-inline-start:5px solid var(--c);border-radius:0 8px 8px 0;
   padding:.7em .9em}
@@ -207,14 +216,32 @@ SIZES = {
 
 points = next(s for s in scenes if s['type'] == 'points' and s.get('reveal'))
 after = [s for s in scenes if s['type'] == 'points'][-1]
-entry = by_img['09-entry-page-clean.png']
-main_zones = zone_frames[0]
-hub = [s for s in scenes if s.get('img') == '27-main-screen-rm.png']
 tor = by_img['26-potential-tor.png']
 confirm = by_img['05-form-confirmation.png']
+inv_sent = inv_by['32-invoice-confirmation.png']
 
 
-def body_html():
+def faq(*qa):
+    """Questions people actually ask, placed beside the section that answers them."""
+    rows = ''.join(f"<dt>{esc(q)}</dt><dd>{a}</dd>" for q, a in qa)
+    return f"<div class='faq'><h4>שאלות נפוצות</h4><dl>{rows}</dl></div>"
+
+
+def routes(f):
+    return ''.join(
+        f"<div class='route' style='--c:{c['color']}'>"
+        f"<img src='{crop_box(c['img'], c['btn_box'])}' alt=''>"
+        f"<p>{c['said']}. {esc(c['dest'])}.</p></div>" for c in f['cols'])
+
+
+def cover(title, sub):
+    return (f"<div class='cover'><img src='{LOGO}' alt='הביטוח הלאומי · אגף שיקום'>"
+            f"<h1>{esc(title)}</h1><div class='sub'>{esc(sub)}</div>"
+            "<div class='foot'>הביטוח הלאומי · אגף שיקום</div></div>")
+
+
+# ---------------------------------------------------------------- guide A: getting to know it
+def general_html():
     z = main_zones['zones']
     zone_rows = ''.join(
         f"<li><b style='color:{b['color']}'>{esc(f['cap_title'])}</b> — {esc(f['cap'])}</li>"
@@ -223,27 +250,18 @@ def body_html():
         f"<tr><td><span class='pill' style='--c:{i['color']};--b:{i['bg']}'>{esc(i['key'])}</span></td>"
         f"<td>{esc(i['note'].split(': ', 1)[1])}</td></tr>" for i in statuses['items'])
     walk_rows = ''.join(f"<li>{esc(s['cap'])}</li>" for s in walk['steps'][1:])
-    inv_routes = ''.join(
-        f"<div class='route' style='--c:{c['color']}'>"
-        f"<img src='{crop_box(c['img'], c['btn_box'])}' alt=''>"
-        f"<p>{c['said']}. {esc(c['dest'])}.</p></div>" for c in inv_fork['cols'])
-    routes = ''.join(
-        f"<div class='route' style='--c:{c['color']}'>"
-        f"<img src='{crop_box(c['img'], c['btn_box'])}' alt=''>"
-        f"<p>{c['said']} — <b>{esc(c['dest'])}</b>.</p></div>" for c in fork['cols'])
 
-    return f"""
-<div class="cover">
-  <img src="{LOGO}" alt="הביטוח הלאומי · אגף שיקום">
-  <h1>מצפן זכויות איבה</h1>
-  <div class="sub">הסבר כללי למבוטחים</div>
-  <div class="foot">הביטוח הלאומי · אגף שיקום</div>
-</div>
-
+    return cover('מצפן זכויות איבה', 'הסבר כללי למבוטחים') + f"""
 <section>
   <h2><span class="num">1</span> מה זה מצפן הזכויות</h2>
   <p>{esc(points['hero'])} — במקום אחד, לפי הנתונים האישיים שלך. מה אפשר לעשות בו:</p>
   <ul class="pts">{''.join(f'<li>{esc(p)}</li>' for p in points['points'])}</ul>
+  {faq(('אני רואה את המצפן אבל אין בו הטבות. מה זה אומר?',
+        'המצפן מציג הטבות מהשנתיים האחרונות בלבד. אם לא הגשתם בקשות בתקופה זו, '
+        '"ההטבות שלי" יהיה ריק. בדקו את "ההטבות הפוטנציאליות שלי" כדי לראות מה ייתכן שמגיע לכם.'),
+       ('הטבה שאני מקבל לא מופיעה במצפן. האם איבדתי אותה?',
+        'לא. המצפן נבנה בהדרגה והטבות נוספות מתווספות אליו. '
+        'הזכאות שלכם אינה תלויה במה שמוצג במצפן.'))}
 </section>
 
 <section>
@@ -254,6 +272,10 @@ def body_html():
     <li>בעמוד שנפתח לוחצים על הכפתור הכחול <b>כניסה למצפן הזכויות</b>.</li>
   </ol>
   {figure('09-entry-page-clean.png', caption='עמוד הכניסה למצפן.')}
+  {faq(('אני לא מוצא את "מצפן הזכויות שלי" בתפריט. למה?',
+        'בשלב זה המצפן מוצג למי שיש לו תיק איבה מוכר, למשפחות שכולות שהוכרו כתלויים, '
+        'ולהורים של ילדים קטינים עם תיק איבה או שיקום פעיל. אם אתם שייכים לאחת הקבוצות '
+        'ועדיין לא רואים את המצפן — פנו אלינו.'))}
 </section>
 
 <section>
@@ -261,6 +283,10 @@ def body_html():
   <p>המצפן בנוי מארבעה אזורים, מלמעלה למטה. מהמסך הזה יוצאים לכל מקום, ואליו חוזרים.</p>
   {figure('11-main-screen-zones.png', boxes=z)}
   <ul class="pts">{zone_rows}</ul>
+  {faq(('איפה אני רואה את ההטבות של הילדים שלי?',
+        'במסך הראשי, באזור "הצגת הטבות עבור", בוחרים את שם הילד. '
+        'האזור הזה מופיע רק להורים שמקבלים הטבות עבור ילדים קטינים.'),
+       ('איך חוזרים למסך הקודם?', 'בכפתור "חזור" בראש הדף.'))}
 </section>
 
 <section>
@@ -271,12 +297,21 @@ def body_html():
 </section>
 
 <section>
-  <h2><span class="num">5</span> דף ההטבה</h2>
+  <h2><span class="num">5</span> דף ההטבה והסטטוסים</h2>
   <p>{esc(statuses['intro']['cap'])}</p>
   {figure('03-benefit-page-statuses.png', keep=0.90, mzoom={'y': 0.48, 'h': 0.52},
           caption='דף ההטבה. בהטבה פעילה, "פרטים נוספים" פותח את התמונה המלאה.')}
-  <h3>הסטטוסים ומה הם אומרים</h3>
   <table class="st">{st_rows}</table>
+  {faq(('מה ההבדל בין "פעילה" ל"הסתיימה"?',
+        '"פעילה" היא הטבה מאושרת שנשארה בה יתרה, ואפשר להגיש בה קבלות. '
+        '"הסתיימה" היא הטבה שנוצלה במלואה, או שתקופת הזכאות שלה חלפה.'),
+       ('הבקשה שלי בסטטוס "בטיפול" כבר הרבה זמן. מה עושים?',
+        '"בטיפול" אומר שהבקשה התקבלה ועדיין לא התקבלה בה החלטה. אין צורך להגיש שוב.'),
+       ('הבקשה שלי נדחתה. איפה רואים למה?',
+        'סיבת הדחייה מופיעה על כרטיס ההטבה עצמו, בשורה "סיבת הדחייה".'),
+       ('למה אותה הטבה מופיעה גם ב"ההטבות שלי" וגם ב"פוטנציאליות"?',
+        'זה קורה כשאפשר להרחיב את ההטבה — למשל לבקש אותה לתקופה נוספת, '
+        'או עבור בן משפחה נוסף.'))}
 </section>
 
 <section>
@@ -284,8 +319,9 @@ def body_html():
   <p>{esc(walk['steps'][0]['cap'])}</p>
   {figure('21-benefit-details-rm.png', keep=0.845, keepx=0.79, msplit=True)}
   <ul class="pts">{walk_rows}</ul>
-  <div class="note"><b>כאן בודקים אם קבלה שולמה.</b> בכל בקשה מופיע סטטוס הטיפול בה,
-    הסכום שאושר לתשלום, ואפשרות לפתוח את הקבלה עצמה.</div>
+  {faq(('איך אני יודע כמה עוד נשאר לי לנצל?',
+        'בדף ההטבה, באזור "סיכום מימוש", מופיע פס עם הסכום ששולם, מה שנותר, '
+        'והסכום הכולל.'))}
 </section>
 
 <section>
@@ -298,12 +334,29 @@ def body_html():
 <section>
   <h2><span class="num">8</span> שני הכפתורים</h2>
   <p>{esc(fork['hint'])}</p>
-  <div class="routes">{routes}</div>
+  <div class="routes">{routes(fork)}</div>
   <p>המערכת קובעת איזה כפתור יופיע, ואין מה לבחור.</p>
+  {faq(('האם הגשת הבקשה מבטיחה שאקבל את ההטבה?',
+        'לא. הגשת בקשה אינה מהווה אישור אוטומטי. הזכאות נבדקת לפי הקריטריונים '
+        'שנקבעו בחוק ובהתאם למסמכים שהוגשו.'))}
 </section>
 
 <section>
-  <h2><span class="num">9</span> איך מגישים חשבונית או קבלה</h2>
+  <h2><span class="num">9</span> אחרי שהגשת</h2>
+  <p>{esc(after['lead'])}</p>
+  <ul class="pts">{''.join(f'<li>{esc(p)}</li>' for p in after['points'])}</ul>
+  {figure('05-form-confirmation.png', caption=esc(confirm['cap']))}
+  {faq(('מה קורה אחרי ששלחתי?',
+        'ההטבה עוברת ל"ההטבות שלי". משם נכנסים אליה ורואים את סטטוס הטיפול בבקשה.'))}
+</section>
+"""
+
+
+# ---------------------------------------------------------------- guide B: submitting
+def invoice_html():
+    return cover('הגשת חשבונית או קבלה', 'במצפן זכויות איבה') + f"""
+<section>
+  <h2><span class="num">1</span> שתי דרכים להגיע לטופס</h2>
   <p>{esc(inv_zones['cap'])}</p>
   {figure('27-main-screen-rm.png', keep=0.928, boxes=inv_zones['zones'],
           caption='1 — הדרך המועדפת. 2 — רק אם ההטבה לא מופיעה למעלה.')}
@@ -314,16 +367,24 @@ def body_html():
     <li>בתמונה המלאה לוחצים על הכפתור הכחול
         <b>+ להגשת חשבונית / קבלה חדשה</b>.</li>
   </ol>
-  {figure('25-benefit-details-rg.png', trim=True,
-          mzoom={'y': 0.50, 'h': 0.28},
+  {figure('25-benefit-details-rg.png', trim=True, mzoom={'y': 0.50, 'h': 0.28},
           caption='הכפתור הכחול יושב מעל "בקשות להחזר".')}
-  <h3>אם ההטבה לא מופיעה ב"ההטבות שלי"</h3>
-  <p>מחפשים אותה בהטבות הפוטנציאליות. {esc(inv_fork['hint'])}</p>
-  <div class="routes">{inv_routes}</div>
+  {faq(('למה אני לא רואה את הכפתור "להגשת חשבונית / קבלה חדשה"?',
+        'הכפתור מופיע רק בהטבה בסטטוס "פעילה". בהטבה שהסתיימה או שנדחתה '
+        'אי אפשר להגיש קבלות.'))}
 </section>
 
 <section>
-  <h2><span class="num">10</span> שלושת שלבי הטופס</h2>
+  <h2><span class="num">2</span> אם ההטבה לא מופיעה ב"ההטבות שלי"</h2>
+  <p>מחפשים אותה בהטבות הפוטנציאליות. שימו לב: בשלב זה עדיין לא כל ההטבות
+     הפוטנציאליות פתוחות להגשת חשבוניות דרך המצפן. {esc(inv_fork['hint'])}</p>
+  <div class="routes">{routes(inv_fork)}</div>
+  <div class="note"><b>כשלא מופיע "הגשת בקשה", ההגשה אינה נעשית במצפן.</b>
+    במקרה כזה מגישים את החשבונית בשליחת מסמכים לפקיד. [[פרטים]]</div>
+</section>
+
+<section>
+  <h2><span class="num">3</span> שלושת שלבי הטופס</h2>
   <p>משתי הדרכים מגיעים לאותו טופס.</p>
   <h3>שלב 1 — פרטי ההטבה</h3>
   <p>רק בודקים שהפרטים נכונים ולוחצים <b>הבא</b>.</p>
@@ -337,29 +398,62 @@ def body_html():
   <p>{esc(inv_walks[1]['steps'][0]['cap'])} {esc(inv_walks[1]['steps'][1]['cap'])}</p>
   {figure('31-form-step3.png', trim=True, mzoom={'y': 0.60, 'h': 0.40},
           caption='החתימה נעשית בעכבר במחשב, או באצבע בטלפון.')}
+  {faq(('אילו מסמכים צריך לצרף?',
+        'זה משתנה מהטבה להטבה, לפי מה שהוגדר לכל אחת. יש הטבות שדורשות קבלה בלבד, '
+        'ויש שדורשות גם קבלה וגם אישור מקופת חולים.'),
+       ('על החשבונית שלי יש כמה טיפולים. מה ממלאים?',
+        'ממלאים תקופה מתאריך עד תאריך, את הכמות, ואת סכום החשבונית הכולל.'),
+       ('יש לי כמה חשבוניות לאותה בקשה.',
+        'אחרי מילוי הפרטים של החשבונית הראשונה לוחצים על "+ הוסף חשבונית".'),
+       ('עד מתי אחורה אפשר להגיש?',
+        'בשלב הראשון של הטופס ממלאים את תאריך תחילת מימוש ההטבה. '
+        'ניתן להגיש עד שנה אחורה.'),
+       ('איך חותמים?', 'בעכבר במחשב, או באצבע על המסך במכשיר נייד.'))}
   <div class="note"><b>הגשת בקשה אינה אישור אוטומטי לקבלת ההטבה.</b>
     הזכאות תיבדק לפי הקריטריונים שנקבעו בחוק ובהתאם למסמכים שהוגשו.</div>
 </section>
 
 <section>
-  <h2><span class="num">11</span> אחרי שהגשת</h2>
-  <p>{esc(after['lead'])}</p>
-  <ul class="pts">{''.join(f'<li>{esc(p)}</li>' for p in after['points'])}</ul>
-  {figure('05-form-confirmation.png', caption=esc(confirm['cap']))}
+  <h2><span class="num">4</span> אחרי השליחה</h2>
+  <p>{esc(inv_sent['cap'])}</p>
+  {figure('32-invoice-confirmation.png', trim=True,
+          caption='מסך האישור שמופיע בסוף התהליך.')}
+  {faq(('הגשתי קבלה ולא קיבלתי הודעת אישור. האם הבקשה התקבלה?',
+        'אחרי שליחה תקינה מופיעה ההודעה "תודה, פנייתך נקלטה להמשך טיפול". '
+        'אם לא ראיתם אותה, היכנסו לדף ההטבה ובדקו אם הבקשה מופיעה ב"בקשות להחזר". '
+        'אם היא לא שם — הגישו שוב.'),
+       ('הגשתי קבלה ומופיע "בקשה זו הועברה לטיפול בהטבה אחרת". מה זה אומר?',
+        'הקבלה הוגשה בהטבה לא מתאימה, והיא הועברה להטבה הנכונה. '
+        'הבקשה ממשיכה להיות מטופלת שם. אין צורך להגיש שוב.'))}
+</section>
+
+<section>
+  <h2><span class="num">5</span> איך עוקבים</h2>
+  <p>הבקשה מופיעה בדף ההטבה תחת "בקשות להחזר", עם התאריך, הסכום, סטטוס הטיפול בה,
+     ואפשרות לפתוח את הקבלה עצמה. כאן בודקים אם קבלה שולמה.</p>
+  {figure('25-benefit-details-rg.png', trim=True, mzoom={'y': 0.58, 'h': 0.42},
+          caption='אזור "בקשות להחזר" בדף ההטבה.')}
+  {faq(('אפשר לראות את הקבלה שהגשתי?',
+        'כן. באזור "בקשות להחזר", ליד כל חשבונית יש סמל הורדה.'))}
 </section>
 """
 
 
+GUIDES = [('מדריך מצפן זכויות איבה', general_html),
+          ('מדריך הגשת חשבונית או קבלה', invoice_html)]
+
 os.makedirs(OUT, exist_ok=True)
-for key, (size_css, label) in SIZES.items():
-    MOBILE = key == 'mobile'
-    doc = ("<!doctype html><html lang='he' dir='rtl'><head><meta charset='utf-8'>"
-           f"<style>{CSS_COMMON}{size_css}</style></head><body>{body_html()}</body></html>")
-    hp = os.path.join(OUT, f'guide-{key}.html')
-    pdf = os.path.join(OUT, f'מדריך מצפן זכויות איבה - {label}.pdf')
-    open(hp, 'w', encoding='utf-8').write(doc)
-    subprocess.run([chrome, '--headless', '--no-sandbox', '--disable-gpu',
-                    '--no-pdf-header-footer', f'--print-to-pdf={pdf}',
-                    '--virtual-time-budget=20000', 'file://' + hp], check=True,
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    print('wrote', os.path.relpath(pdf, ROOT), f'{os.path.getsize(pdf)/1e6:.1f} MB')
+for name, build in GUIDES:
+    for key, (size_css, label) in SIZES.items():
+        MOBILE = key == 'mobile'
+        doc = ("<!doctype html><html lang='he' dir='rtl'><head><meta charset='utf-8'>"
+               f"<style>{CSS_COMMON}{size_css}</style></head><body>{build()}</body></html>")
+        stem = f'{name} - {label}'
+        hp = os.path.join(OUT, f'{stem}.html')
+        pdf = os.path.join(OUT, f'{stem}.pdf')
+        open(hp, 'w', encoding='utf-8').write(doc)
+        subprocess.run([chrome, '--headless', '--no-sandbox', '--disable-gpu',
+                        '--no-pdf-header-footer', f'--print-to-pdf={pdf}',
+                        '--virtual-time-budget=20000', 'file://' + hp], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print('wrote', os.path.relpath(pdf, ROOT), f'{os.path.getsize(pdf)/1e6:.1f} MB')
