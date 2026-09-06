@@ -76,5 +76,5 @@ for i, s in enumerate(tl):
 open('clips.txt', 'w').write('\n'.join(lines) + '\n')
 PY
 
-"$FFMPEG" -y -loglevel error -f concat -safe 0 -i clips.txt -c copy הסבר כללי מצפן זכויות איבה.mp4
+"$FFMPEG" -y -loglevel error -f concat -safe 0 -i clips.txt -c copy "הסבר כללי מצפן זכויות איבה.mp4"
 echo "wrote build/out/הסבר כללי מצפן זכויות איבה.mp4"
