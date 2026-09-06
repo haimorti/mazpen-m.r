@@ -82,6 +82,16 @@ def spotlight(im, band, dim=0.45, blur=6):
     return out
 
 
+MAX_W, MAX_H, MAX_UPSCALE = 1792, 700, 1.25
+
+
+def fit(im):
+    """Display size for a screenshot: fits the stage, and never enlarges the source
+    by more than a quarter, so nothing looks stretched or soft."""
+    w = min(MAX_W, im.width * MAX_UPSCALE, im.width * MAX_H / im.height)
+    return round(w), round(w * im.height / im.width)
+
+
 def shot_uri(name, crop=None, zoom=None):
     """Screenshot as a data URI. `crop` keeps the top/bottom 55%; `zoom` takes a
     fractional {x,y,w,h} box and upscales it with LANCZOS for the sharpest result."""
@@ -119,8 +129,6 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .zwrap{position:relative;line-height:0}
 .zwrap img{display:block;width:100%;max-width:none;max-height:none;height:auto}
 .zback.dim{filter:blur(7px) brightness(.55) saturate(.5)}
-.zband{position:absolute;right:0;left:0;overflow:hidden}
-.zband img{position:relative}
 .zbox{position:absolute;border:5px solid var(--zc);border-radius:12px;box-shadow:0 0 0 4px rgba(255,255,255,.55)}
 .zn{position:absolute;top:50%;right:-30px;transform:translate(50%,-50%);width:52px;height:52px;border-radius:50%;
   background:#fff;border:5px solid var(--zc);color:var(--zc);font-family:'Rubik';font-weight:700;font-size:28px;
@@ -130,11 +138,8 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .zlab{position:absolute;top:50%;left:12px;transform:translateY(-50%);max-width:42%;background:#fff;
   border:3px solid var(--zc);border-radius:10px;color:var(--zc);font-size:22px;font-weight:700;line-height:1.25;
   padding:8px 14px;text-align:right;white-space:normal}
-.shot{position:relative;display:inline-block;line-height:0}
-.frame.focus{width:1792px}
-.frame.focus img{width:100%;max-width:none;max-height:none;height:auto}
-.shot.fill{width:1792px}
-.shot.fill img{width:100%;max-width:none;height:auto}
+.shot{position:relative;line-height:0}
+.shot img{display:block;width:100%;max-width:none;max-height:none;height:auto}
 .hl{position:absolute;border:5px solid #DC2626;border-radius:10px;
   box-shadow:0 0 0 5px rgba(220,38,38,.16)}
 .cap{position:absolute;right:64px;left:64px;bottom:60px;min-height:120px;background:#16202B;color:#fff;
@@ -155,6 +160,10 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   line-height:1.15;letter-spacing:-.02em}
 .lead{font-size:40px;font-weight:700;color:#16202B;margin-bottom:30px;line-height:1.3}
 .pt{display:flex;align-items:flex-start;gap:28px;font-size:40px;line-height:1.35;margin-bottom:26px}
+.pt{transition:none}
+.pt.off{visibility:hidden}
+.pt.on{color:#14477E;font-weight:600}
+.pt.on i{background:#DC7B1E;transform:scale(1.12)}
 .pt i{flex:none;width:56px;height:56px;border-radius:16px;background:#14477E;color:#fff;display:grid;
   place-items:center;font-style:normal;font-family:'Rubik';font-weight:600;font-size:30px;margin-top:4px}
 
@@ -199,7 +208,7 @@ def esc(s):
     return html.escape(s)
 
 
-def render(scene, total):
+def render(scene, total, step=None):
     n = scene['n']
     k = f"<span class='k'>{n} / {total}</span>"
     t = scene['type']
@@ -212,8 +221,11 @@ def render(scene, total):
     elif t == 'points':
         hero = f"<h1 class='hero'>{esc(scene['hero'])}</h1>" if scene.get('hero') else ''
         lead = f"<div class='lead'>{esc(scene['lead'])}</div>" if scene.get('lead') else ''
-        pts = ''.join(f"<div class='pt'><i>{i+1}</i><span>{esc(p)}</span></div>"
-                      for i, p in enumerate(scene['points']))
+        shown = scene.get('_shown', len(scene['points']))     # how many bullets are out yet
+        pts = ''.join(
+            f"<div class='pt{' on' if i + 1 == shown else ''}"
+            f"{' off' if i + 1 > shown else ''}'><i>{i+1}</i><span>{esc(p)}</span></div>"
+            for i, p in enumerate(scene['points']))
         body = head + f"<div class='body'>{hero}{lead}{pts}</div>"
     elif t == 'cards':
         cards = ''.join(
@@ -245,30 +257,26 @@ def render(scene, total):
         body = head + f"<div class='body'>{lead}<div class='fields'>{fl}</div>{note}</div>"
     elif t == 'zones':
         zim = load_shot(scene['img'])
-        zw = min(1792, round(700 * zim.width / zim.height))   # fit the stage, keep the aspect
-        src = to_uri(zim)
-        zs = scene['zones']
         act = scene.get('active')            # 1-based zone to spotlight; None = show them all
+        if act:
+            b = [z for z in scene['zones'] if z['n'] == act][0]['box']
+            zim = spotlight(zim, {'y': max(0, b['y'] - 1.2) / 100,
+                                  'h': min(100, b['h'] + 2.4) / 100}, dim=0.42, blur=6)
+        zw, zh = fit(zim)
+        src = to_uri(zim)
         boxes = ''.join(
             f"<div class='zbox' style='--zc:{z['color']};right:{z['box']['x']}%;top:{z['box']['y']}%;"
             f"width:{z['box']['w']}%;height:{z['box']['h']}%"
-            + ('' if act is None or act == z['n'] else ';opacity:.18') + "'>"
+            + ('' if act is None or act == z['n'] else ';opacity:.2') + "'>"
             f"<span class='zn'>{z['n']}</span>"
-            + ("<span class='zlab" + z.get('lab', '') + "'>" + esc(z['label']) + "</span>" if z.get('label') else '')
-            + "</div>" for z in zs)
-        band = ''
-        if act:
-            b = [z for z in zs if z['n'] == act][0]['box']
-            pad = 1.2
-            top, hgt = max(0, b['y'] - pad), min(100, b['h'] + pad * 2)
-            band = (f"<div class='zband' style='top:{top}%;height:{hgt}%'>"
-                    f"<img src='{src}' style='margin-top:-{top / hgt * 100}%' alt=''></div>")
+            + ("<span class='zlab" + z.get('lab', '') + "'>" + esc(z['label']) + "</span>"
+               if z.get('label') and (act is None or act == z['n']) else '')
+            + "</div>" for z in scene['zones'])
         cap = esc(scene['cap'])
         if scene.get('cap_title'):
             cap = f"<div class='ct'>{esc(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
         body = (head + f"<div class='stage'><div class='frame zwrap' style='width:{zw}px'>"
-                f"<img class='zback{' dim' if act else ''}' src='{src}' alt=''>{band}{boxes}</div></div>"
-                f"<div class='cap'>{cap}</div>")
+                f"<img src='{src}' alt=''>{boxes}</div></div><div class='cap'>{cap}</div>")
     elif t == 'shot' and scene.get('focus'):
         im = load_shot(scene['img'])
         src = to_uri(spotlight(im, scene['focus']))
@@ -278,19 +286,26 @@ def render(scene, total):
         body = (head + f"<div class='stage'><div class='frame focus'><img src='{src}' alt=''></div></div>"
                 f"<div class='cap'>{cap}</div>")
     else:  # shot
-        src, _ = shot_uri(scene['img'], scene.get('crop'), scene.get('zoom'))
+        im = load_shot(scene['img'])
+        if scene.get('crop'):
+            keep = int(im.height * 0.55)
+            im = im.crop((0, 0, im.width, keep) if scene['crop'] == 'top'
+                         else (0, im.height - keep, im.width, im.height))
+        if scene.get('focus'):
+            im = spotlight(im, scene['focus'])
+        sw, sh = fit(im)
         hl = scene.get('highlight')
         hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
                   f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
-        fill = ' fill' if scene.get('fill') or scene.get('zoom') else ''
-        img = f"<div class='shot{fill}'><img src='{src}' alt=''>{hl_div}</div>"
         cap = esc(scene['cap'])
         if scene.get('cap_title'):
             cap = f"<div class='ct'>{esc(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
-        body = head + f"<div class='stage'><div class='frame'>{img}</div></div><div class='cap'>{cap}</div>"
+        body = (head + f"<div class='stage'><div class='frame'><div class='shot' style='width:{sw}px'>"
+                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div><div class='cap'>{cap}</div>")
 
-    hpath = os.path.join(SLIDES, f"{n:02d}.html")
-    ppath = os.path.join(SLIDES, f"{n:02d}.png")
+    tag = f"{n:02d}" if step is None else f"{n:02d}{chr(97 + step)}"
+    hpath = os.path.join(SLIDES, f"{tag}.html")
+    ppath = os.path.join(SLIDES, f"{tag}.png")
     with open(hpath, 'w', encoding='utf-8') as f:
         f.write(page(body))
     subprocess.run([chrome, '--headless', '--no-sandbox', '--disable-gpu', '--hide-scrollbars',
@@ -311,17 +326,26 @@ def srt_time(s):
 
 scenes = json.load(open(os.path.join(ROOT, 'build', 'scenes.json'), encoding='utf-8'))
 total = len(scenes)
-concat, srt, motion, t = [], [], [], 0.0
+concat, srt, motion, frames, t = [], [], [], [], 0.0
 for idx, s in enumerate(scenes):
     s['n'] = idx + 1
-    p = render(s, total)
+    if s['type'] == 'points' and s.get('reveal'):
+        # one frame per bullet: the list builds up as the narration reads it out
+        n_steps = len(s['points'])
+        share = s['dur'] / n_steps
+        for k in range(n_steps):
+            s['_shown'] = k + 1
+            fp = render(s, total, step=k)
+            frames.append((fp, share))
+        p = fp
+    else:
+        p = render(s, total)
+        frames.append((p, s['dur']))
     print('rendered', os.path.basename(p))
     m = None
     if s.get('cursor'):
         im = load_shot(s['img'])
-        # the screenshot is laid out to fit 1792x700, centred in the stage (top 132, height 712)
-        sc = min(1792 / im.width, 700 / im.height)
-        dw, dh = im.width * sc, im.height * sc
+        dw, dh = fit(im)                       # same size the slide renders it at
         left, top = (1920 - dw) / 2, 132 + (712 - dh) / 2
         m = {'cursor': [{'t': w['t'],
                          'x': round(left + w['x'] * dw), 'y': round(top + w['y'] * dh),
@@ -336,13 +360,21 @@ for idx, s in enumerate(scenes):
         m = {'slide': os.path.basename(p), 'dur': s['dur'], 'zoom': round(z, 3),
              'cx': round(960 * SCALE), 'cy': round(cy * SCALE)}
     motion.append(m)
-    concat.append(f"file '{p}'\nduration {s['dur']}")
     srt.append(f"{s['n']}\n{srt_time(t + 0.3)} --> {srt_time(t + s['dur'] - 0.3)}\n{s['vo']}\n")
     t += s['dur']
-concat.append(f"file '{p}'")  # repeat last frame so its duration is honored
+for fp, d in frames:
+    concat.append(f"file '{fp}'\nduration {d}")
+concat.append(f"file '{frames[-1][0]}'")  # repeat last frame so its duration is honored
 open(os.path.join(OUT, 'concat.txt'), 'w', encoding='utf-8').write('\n'.join(concat) + '\n')
 open(os.path.join(OUT, 'subtitles.srt'), 'w', encoding='utf-8').write('\n'.join(srt))
-json.dump([{'slide': f'{i+1:02d}.png', 'dur': s['dur'], **({'motion': motion[i]} if motion[i] else {})}
-           for i, s in enumerate(scenes)],
+tl = []
+fi = 0
+for i, s in enumerate(scenes):
+    n_f = len(s['points']) if s['type'] == 'points' and s.get('reveal') else 1
+    for _ in range(n_f):
+        fp, d = frames[fi]; fi += 1
+        tl.append({'slide': os.path.basename(fp), 'dur': d,
+                   **({'motion': motion[i]} if motion[i] else {})})
+json.dump(tl,
           open(os.path.join(OUT, 'timeline.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(f'total {t:.0f}s, {total} slides at {W*SCALE}x{H*SCALE}')
