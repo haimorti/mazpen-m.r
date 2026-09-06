@@ -162,18 +162,19 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .fcol{position:absolute;top:176px;bottom:34px;width:870px;display:flex;flex-direction:column;align-items:center;gap:0}
 .fcol.right{right:60px}
 .fcol.left{left:60px}
-.fbtn{width:420px;line-height:0;border-radius:12px;overflow:hidden;border:5px solid transparent}
+.fbtn{flex:none;width:420px;line-height:0;border-radius:12px;overflow:hidden;border:5px solid transparent}
 .fbtn.on{border-color:#DC2626;box-shadow:0 0 0 5px rgba(220,38,38,.20)}
 .fbtn img{display:block;width:100%}
-.fsaid{margin-top:12px;font-size:25px;color:#3C4C60;text-align:center;line-height:1.3;height:64px}
+.fsaid{flex:none;margin-top:12px;font-size:25px;color:#3C4C60;text-align:center;line-height:1.3;height:64px}
 .fsaid b{color:var(--c)}
-.fdrop{visibility:hidden;flex:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fdrop{visibility:hidden;flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:6px}
 .fdrop.show{visibility:visible}
 .farrow{color:var(--c);font-size:40px;font-weight:700;line-height:1}
 .fdest{font-family:'Rubik';font-weight:600;font-size:28px;color:var(--c);text-align:center}
-.fscr{margin-top:6px;flex:1;width:100%;line-height:0;border-radius:10px;overflow:hidden;
-  border:3px solid var(--c);background:#fff}
-.fscr img{display:block;width:100%}
+.fscr{margin-top:6px;flex:1;min-height:0;width:100%;line-height:0;
+  display:flex;align-items:flex-start;justify-content:center}
+.fscr img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;
+  box-sizing:border-box;border-radius:10px;border:3px solid var(--c);background:#fff}
 .cmp{position:absolute;top:124px;right:60px;left:60px;bottom:40px;display:flex;flex-direction:column;gap:20px;
   justify-content:center}
 .chint{font-size:32px;font-weight:700;color:#16202B;text-align:center}
