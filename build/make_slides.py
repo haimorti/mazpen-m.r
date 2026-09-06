@@ -95,6 +95,16 @@ def fit(im, big=False):
     return round(w), round(w * im.height / im.width)
 
 
+def cursor_track(scene, waypoints, big=False):
+    """Fractional waypoints on the screenshot -> pixels on the 1920x1080 slide."""
+    im = shot_im(scene)
+    dw, dh = fit(im, big)                      # same size the slide renders it at
+    left, top = (1920 - dw) / 2, 132 + ((802 if big else stage_h(scene)) - dh) / 2
+    return {'cursor': [{'t': w['t'], 'x': round(left + w['x'] * dw),
+                        'y': round(top + w['y'] * dh), 'click': bool(w.get('click'))}
+                       for w in waypoints]}
+
+
 def stage_h(scene):
     """Logical height of the stage box, which the cursor track has to agree with."""
     return 802 if scene.get('big') else 712
@@ -159,7 +169,7 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   padding:8px 14px;text-align:right;white-space:normal}
 .slist{position:absolute;top:116px;right:56px;left:56px;bottom:34px;display:flex;flex-direction:column;
   align-items:center;gap:14px}
-.snote{font-size:29px;font-weight:700;color:#16202B;text-align:center;min-height:40px}
+.snote{font-size:29px;font-weight:700;color:#16202B;text-align:center;line-height:1.35;min-height:82px;max-width:1600px;display:flex;align-items:center;justify-content:center}
 .scards{display:flex;gap:14px;width:100%}
 .scard{flex:1;background:#fff;border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;
   align-items:center;gap:8px;box-shadow:0 2px 10px rgba(20,34,54,.07);border:4px solid transparent}
@@ -291,7 +301,8 @@ def render(scene, total, step=None):
     if t == 'title':
         body = (f"<img class='mark' src='{LOGO}' alt=''>"
                 f"<div class='center'><h1>{esc(scene['title'])}</h1>"
-                f"<div class='sub'>{esc(scene['sub'])}</div></div>")
+                + (f"<div class='sub'>{esc(scene['sub'])}</div>" if scene.get('sub') else '')
+                + "</div>")
     elif t == 'points':
         hero = f"<h1 class='hero'>{esc(scene['hero'])}</h1>" if scene.get('hero') else ''
         lead = f"<div class='lead'>{esc(scene['lead'])}</div>" if scene.get('lead') else ''
@@ -403,26 +414,31 @@ def render(scene, total, step=None):
                 f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
                 f"<div class='cap{' slim' if big else ''}'>{esc(st['cap'])}</div>")
     elif t == 'statuslist':
-        im = load_shot(scene['img'])
-        act = scene.get('_lit')
-        cur = scene['items'][act - 1] if act else None
-        hl = cur.get('on_screen') if cur else None
-        hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
-                  f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
-        sh = 690
-        sw = round(sh * im.width / im.height)
-        cards = ''.join(
-            "<div class='scard" + (' lit' if act == i + 1 else (' dim' if act else '')) + "'>"
-            f"<span class='spill' style='--c:{r['color']};--b:{r['bg']}'>{esc(r['key'])}</span>"
-            f"<p>{esc(r['short'])}</p></div>"
-            for i, r in enumerate(scene['items']))
-        lead = cur['note'] if cur and cur.get('note') else scene.get('intro')
-        note = (f"<div class='snote'>{esc(lead)}</div>" if lead
-                else "<div class='snote'>&nbsp;</div>")
-        body = (head + "<div class='slist'>"
-                f"<div class='frame' style='width:{sw}px'><div class='shot' style='width:{sw}px'>"
-                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div>"
-                f"{note}<div class='scards'>{cards}</div></div>")
+        im = shot_im(scene)
+        phase = scene.get('_phase', 'cards')
+        if phase != 'cards':
+            sw, sh = fit(im, True)
+            body = (head + "<div class='stage tall'><div class='frame'>"
+                    f"<div class='shot' style='width:{sw}px'><img src='{to_uri(im)}' alt=''></div>"
+                    f"</div></div><div class='cap slim'>{esc(scene[phase]['cap'])}</div>")
+        else:
+            act = scene.get('_lit')
+            cur = scene['items'][act - 1]
+            hl = cur.get('on_screen')
+            hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
+                      f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+            sh = 650
+            sw = round(sh * im.width / im.height)
+            cards = ''.join(
+                "<div class='scard" + (' lit' if act == i + 1 else ' dim') + "'>"
+                f"<span class='spill' style='--c:{r['color']};--b:{r['bg']}'>{esc(r['key'])}</span>"
+                f"<p>{esc(r['short'])}</p></div>"
+                for i, r in enumerate(scene['items']))
+            body = (head + "<div class='slist'>"
+                    f"<div class='frame' style='width:{sw}px'><div class='shot' style='width:{sw}px'>"
+                    f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div>"
+                    f"<div class='snote'>{esc(cur['note'])}</div>"
+                    f"<div class='scards'>{cards}</div></div>")
     elif t == 'zones':
         zim = shot_im(scene)
         act = scene.get('active')            # 1-based zone to spotlight; None = show them all
@@ -433,9 +449,10 @@ def render(scene, total, step=None):
         zw, zh = fit(zim)
         src = to_uri(zim)
         boxes = ''.join(
+            '' if act is not None and act != z['n'] else
             f"<div class='zbox' style='--zc:{z['color']};right:{z['box']['x']}%;top:{z['box']['y']}%;"
             f"width:{z['box']['w']}%;height:{z['box']['h']}%"
-            + ('' if act is None or act == z['n'] else ';opacity:.2') + "'>"
+            + "'>"
             f"<span class='zn'>{z['n']}</span>"
             + ("<span class='zlab" + z.get('lab', '') + "'>" + esc(z['label']) + "</span>"
                if z.get('label') and (act is None or act == z['n']) else '')
@@ -509,13 +526,18 @@ for idx, s in enumerate(scenes):
             frames.append((fp, fr['dur'], {'cursor': fr['cursor']}))
         p = fp
     elif s['type'] == 'statuslist':
-        # an optional opening frame says what the screen is, before any status is called out
-        lits = ([None] if s.get('intro') else []) + list(range(1, len(s['items']) + 1))
-        share = s['dur'] / len(lits)
-        for k, lit in enumerate(lits):
-            s['_lit'] = lit
+        # wide opening frame, then one frame per status, then a wide frame with the click
+        seq = [('intro', None, s['intro']['dur'])] if s.get('intro') else []
+        wide = sum(s[k]['dur'] for k in ('intro', 'outro') if s.get(k))
+        share = (s['dur'] - wide) / len(s['items'])
+        seq += [('cards', i + 1, share) for i in range(len(s['items']))]
+        if s.get('outro'):
+            seq.append(('outro', None, s['outro']['dur']))
+        for k, (phase, lit, d) in enumerate(seq):
+            s['_phase'], s['_lit'] = phase, lit
             fp = render(s, total, step=k)
-            frames.append((fp, share, None))
+            frames.append((fp, d, cursor_track(s, s[phase]['cursor'], big=True)
+                           if phase != 'cards' and s[phase].get('cursor') else None))
         p = fp
     elif s['type'] == 'points' and s.get('reveal'):
         # one frame per bullet: the list builds up as the narration reads it out
@@ -532,12 +554,7 @@ for idx, s in enumerate(scenes):
     print('rendered', os.path.basename(p))
     m = None
     if s.get('cursor') and s.get('img'):
-        im = shot_im(s)
-        dw, dh = fit(im, s.get('big'))         # same size the slide renders it at
-        left, top = (1920 - dw) / 2, 132 + (stage_h(s) - dh) / 2
-        m = {'cursor': [{'t': w['t'],
-                         'x': round(left + w['x'] * dw), 'y': round(top + w['y'] * dh),
-                         'click': bool(w.get('click'))} for w in s['cursor']]}
+        m = cursor_track(s, s['cursor'], big=s.get('big'))
     elif s.get('focus'):
         im = load_shot(s['img'])
         disp_h = 1792 * im.height / im.width          # image height at the fixed focus layout
