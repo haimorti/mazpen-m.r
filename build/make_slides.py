@@ -186,9 +186,8 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   font-family:'Assistant','DejaVu Sans',sans-serif;direction:rtl;text-align:right;
   -webkit-font-smoothing:antialiased}
 .top{position:absolute;top:0;right:0;left:0;height:100px;background:#14477E;color:#fff;display:flex;
-  align-items:center;justify-content:space-between;padding:0 64px}
+  align-items:center;padding:0 64px}
 .top .t{font-family:'Rubik';font-weight:600;font-size:40px;letter-spacing:-.01em}
-.top .k{opacity:.75;font-variant-numeric:tabular-nums;direction:ltr;font-size:28px;font-weight:600}
 .stage{position:absolute;top:132px;right:64px;left:64px;bottom:236px;display:flex;align-items:center;justify-content:center}
 .frame{max-width:100%;max-height:100%;background:#fff;border-radius:16px;
   box-shadow:0 2px 4px rgba(20,34,54,.06),0 18px 50px rgba(20,34,54,.14);overflow:hidden;line-height:0}
@@ -338,9 +337,8 @@ def esc(s):
 
 def render(scene, total, step=None):
     n = scene['n']
-    k = f"<span class='k'>{n} / {total}</span>"
     t = scene['type']
-    head = f"<div class='top'><span class='t'>{esc(scene.get('title',''))}</span>{k}</div>"
+    head = f"<div class='top'><span class='t'>{esc(scene.get('title',''))}</span></div>"
 
     if t == 'title':
         body = (f"<img class='mark' src='{LOGO}' alt=''>"
