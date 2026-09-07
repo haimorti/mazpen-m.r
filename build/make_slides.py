@@ -15,14 +15,17 @@ SCENES_FILE = 'scenes.json'                    # a second guide lives in its own
 if '--scenes' in sys.argv:
     SCENES_FILE = sys.argv[sys.argv.index('--scenes') + 1]
 NAME = os.path.splitext(os.path.basename(SCENES_FILE))[0]
+PORTRAIT = '--portrait' in sys.argv            # a cut for a phone held upright
 OUT = os.path.join(ROOT, 'build', 'out')
 if NAME != 'scenes':
     OUT = os.path.join(OUT, NAME)
+if PORTRAIT:
+    OUT = os.path.join(OUT, 'portrait')
 SLIDES = os.path.join(OUT, 'slides')
 SHOTS = os.path.join(ROOT, 'source', 'screenshots')
 FONTS = os.path.join(ROOT, 'build', 'fonts')
-SCALE = 2                      # device pixel ratio; slides come out 3840x2160
-W, H = 1920, 1080              # logical slide size
+SCALE = 2                      # device pixel ratio; slides come out at twice this
+W, H = (1080, 1920) if PORTRAIT else (1920, 1080)
 os.makedirs(SLIDES, exist_ok=True)
 
 chrome = None
@@ -90,6 +93,16 @@ def spotlight(im, band, dim=0.45, blur=6):
 
 MAX_W, MAX_H, MAX_UPSCALE = 1792, 700, 1.25
 BIG_H, BIG_UPSCALE = 750, 1.45          # scenes marked "big": slim caption, taller stage
+if PORTRAIT:
+    # upright, the screenshot gets the full width of the phone and the caption sits
+    # under it with room to spare, so the picture reads about a third larger
+    MAX_W, MAX_H, MAX_UPSCALE = 1000, 1180, 1.25
+    BIG_H, BIG_UPSCALE = 1280, 1.45
+STAGE_TOP_CAPPED = 330 if PORTRAIT else 186
+STAGE_TOP = 150 if PORTRAIT else 132
+STAGE_BOTTOM = 470 if PORTRAIT else 236
+STAGE_BOTTOM_BIG = 330 if PORTRAIT else 186
+STAGE_BOTTOM_CAPPED = 470 if PORTRAIT else 44
 
 
 def fit(im, big=False):
@@ -104,12 +117,11 @@ def fit(im, big=False):
 
 
 def cursor_track(scene, waypoints, big=False):
-    """Fractional waypoints on the screenshot -> pixels on the 1920x1080 slide."""
+    """Fractional waypoints on the screenshot -> pixels on the slide."""
     im = shot_im(scene)
     dw, dh = fit(im, big)                      # same size the slide renders it at
-    left = (1920 - dw) / 2
-    top = stage_top(scene) + ((762 if big and not scene.get('topcap')
-                               else stage_h(scene)) - dh) / 2
+    left = (W - dw) / 2
+    top = stage_top(scene) + (stage_h(scene) - dh) / 2
     return {'cursor': [{'t': w['t'], 'x': round(left + w['x'] * dw),
                         'y': round(top + w['y'] * dh), 'click': bool(w.get('click'))}
                        for w in waypoints]}
@@ -125,14 +137,14 @@ def marks(scene):
 
 
 def stage_top(scene):
-    return 186 if scene.get('topcap') else 132
+    return STAGE_TOP_CAPPED if scene.get('topcap') else STAGE_TOP
 
 
 def stage_h(scene):
     """Logical height of the stage box, which the cursor track has to agree with."""
     if scene.get('topcap'):
-        return 1080 - 186 - 44
-    return 762 if scene.get('big') else 712
+        return H - STAGE_TOP_CAPPED - STAGE_BOTTOM_CAPPED
+    return H - STAGE_TOP - (STAGE_BOTTOM_BIG if scene.get('big') else STAGE_BOTTOM)
 
 
 def ink_bbox(im, thr=246, pad=8):
@@ -178,6 +190,65 @@ def shot_uri(name, crop=None, zoom=None):
 
 
 LOGO = to_uri(load_shot('logo-rehab-division.png', bg='#F2F6FA'))   # match the slide ground
+
+
+PORTRAIT_CSS = """
+body{width:1080px;height:1920px}
+.top{height:130px;padding:0 44px}
+.top .t{font-size:46px}
+.stage{top:150px;right:40px;left:40px;bottom:470px}
+.frame img{max-width:1000px;max-height:1180px}
+.stage.tall{bottom:330px}
+.stage.topped{top:330px;bottom:470px}
+.topcap{top:150px;right:44px;left:44px;font-size:40px;line-height:1.35}
+.cap{right:40px;left:40px;bottom:56px;min-height:360px;padding:34px 38px;font-size:52px;line-height:1.4}
+.cap .ct{font-size:42px}
+.cap.slim{bottom:56px;min-height:240px;font-size:46px;padding:26px 34px}
+
+.center{padding:0 90px;gap:26px}
+.mark{top:70px;right:60px;height:120px}
+.center h1{font-size:104px}
+.center .tag{font-size:46px;padding:12px 44px}
+.center .sub{font-size:48px;max-width:880px}
+
+.body{top:190px;right:64px;left:64px;bottom:90px}
+.hero{font-size:84px;margin:0 0 56px}
+.lead{font-size:48px;margin-bottom:36px}
+.pt{font-size:48px;gap:26px;margin-bottom:40px;line-height:1.3}
+.pt i{width:66px;height:66px;font-size:36px;border-radius:18px}
+
+.zlab{font-size:27px;max-width:52%;padding:10px 16px}
+.zlab.out{width:300px;font-size:25px}
+.zn{width:58px;height:58px;font-size:30px}
+
+/* the legend stacks under the screen instead of standing beside it */
+.split{top:170px;right:40px;left:40px;bottom:60px;flex-direction:column;gap:34px;
+  align-items:stretch;justify-content:center}
+.split .frame{flex:none;align-self:center}
+.split .frame img{max-width:1000px;max-height:660px}
+.sleg{flex:none;gap:16px}
+.srow{padding:18px 22px;gap:20px}
+.spill{min-width:200px;font-size:31px;padding:8px 18px}
+.stxt p{font-size:32px}
+.stxt .sdo{font-size:28px}
+
+.slist{top:170px;right:40px;left:40px;bottom:56px;gap:30px}
+.snote{font-size:42px;min-height:150px;max-width:1000px}
+.scards{flex-direction:column;gap:16px}
+.scard{flex-direction:row;align-items:center;justify-content:flex-start;gap:20px;padding:18px 22px}
+.scard p{font-size:31px;text-align:right;margin:0}
+
+/* the two routes stack, one above the other */
+.fhint{top:160px;right:44px;left:44px;font-size:42px;line-height:1.3}
+.fcol{width:1000px;right:40px;left:auto;height:770px}
+.fcol.right{top:300px}
+.fcol.left{top:1110px}
+.fbtn{width:380px}
+.fsaid{font-size:29px;height:78px;margin-top:14px}
+.farrow{font-size:40px}
+.fdest{font-size:31px}
+.fscr img{max-height:470px}
+"""
 
 CSS = FONT_CSS + """
 *{box-sizing:border-box}
@@ -327,7 +398,7 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 
 def page(body):
     return ("<!doctype html><html lang='he' dir='rtl'><head><meta charset='utf-8'>"
-            f"<style>{CSS}</style></head><body>{body}"
+            f"<style>{CSS}{PORTRAIT_CSS if PORTRAIT else ''}</style></head><body>{body}"
             "<div class='brand'>הביטוח הלאומי · אגף שיקום</div></body></html>")
 
 
