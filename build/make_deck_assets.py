@@ -97,6 +97,8 @@ JOBS = {
     'upload': dict(name='33-upload-documents.png'),
     'zones': dict(name='11-main-screen-zones.png'),
 }
+# the entry page is nearly square; the slide wants a band, so keep only the page body
+BANDS = {'entry_wide': ('09-entry-page-clean.png', 0.03, 0.82)}
 for key, job in JOBS.items():
     im = cut(**job)
     if key == 'zones':
@@ -105,6 +107,12 @@ for key, job in JOBS.items():
     if key == 'upload':
         im = boxes(im, [{'box': h, 'color': h.get('c', '#14477E'), 'n': i + 1}
                         for i, h in enumerate(by['33-upload-documents.png']['highlights'])])
+    frame(im).save(os.path.join(DEST, key + '.png'))
+    print(key, im.size)
+
+for key, (name, y0, y1) in BANDS.items():
+    im = cut(name)
+    im = im.crop((0, int(im.height * y0), im.width, int(im.height * y1)))
     frame(im).save(os.path.join(DEST, key + '.png'))
     print(key, im.size)
 
