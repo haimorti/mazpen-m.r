@@ -11,6 +11,8 @@ Output: build/out/מדריך מצפן זכויות איבה - מובייל.pdf, 
 """
 import base64, io, json, os, subprocess, sys, shutil, html
 
+import segno
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'build', 'out')
 SHOTS = os.path.join(ROOT, 'source', 'screenshots')
@@ -98,6 +100,25 @@ def shot(name, keep=None, keepx=None, trim=False):
 MOBILE = False          # set per build; a phone page needs the region, not the whole page
 
 
+def overlay(boxes, zoom=None):
+    """The video's boxes, in per cent of whatever is on the page.
+
+    A box is placed from the right edge, so cropping to a region means measuring
+    it against the region's right edge instead of the screenshot's."""
+    x0, y0 = (zoom.get('x', 0), zoom['y']) if zoom else (0, 0)
+    cw, ch = (zoom.get('w', 1), zoom['h']) if zoom else (1, 1)
+    out = []
+    for b in boxes:
+        x, y, w, h = (b['box'][k] for k in 'xywh')
+        out.append(
+            f"<span class='bx' style='--c:{b['color']};"
+            f"right:{(x / 100 - 1 + x0 + cw) / cw * 100:.2f}%;"
+            f"top:{(y / 100 - y0) / ch * 100:.2f}%;"
+            f"width:{w / cw:.2f}%;height:{h / ch:.2f}%'>"
+            + (f"<i>{b['n']}</i>" if b.get('n') else '') + "</span>")
+    return ''.join(out)
+
+
 def figure(name, keep=None, keepx=None, boxes=(), caption=None, width=1500,
            mzoom=None, msplit=False, trim=False):
     """A screenshot with the same overlay boxes the video draws, plus a caption.
@@ -116,14 +137,11 @@ def figure(name, keep=None, keepx=None, boxes=(), caption=None, width=1500,
             parts = [im.crop((int(mzoom.get('x', 0) * w), int(mzoom['y'] * h),
                               int((mzoom.get('x', 0) + mzoom.get('w', 1)) * w),
                               int((mzoom['y'] + mzoom['h']) * h)))]
+        inner = overlay(boxes, mzoom) if boxes and mzoom and not msplit else ''
         return ('<figure>'
-                + ''.join(f"<div class='shotwrap'><img src='{uri(pt, width)}' alt=''></div>"
+                + ''.join(f"<div class='shotwrap'><img src='{uri(pt, width)}' alt=''>{inner}</div>"
                           for pt in parts) + cap + '</figure>')
-    ov = ''.join(
-        f"<span class='bx' style='--c:{b['color']};right:{b['box']['x']}%;top:{b['box']['y']}%;"
-        f"width:{b['box']['w']}%;height:{b['box']['h']}%'>"
-        + (f"<i>{b['n']}</i>" if b.get('n') else '') + "</span>"
-        for b in boxes)
+    ov = overlay(boxes)
     return (f"<figure><div class='shotwrap'><img src='{uri(shot(name, keep, keepx, trim), width)}' alt=''>"
             f"{ov}</div>{cap}</figure>")
 
@@ -138,6 +156,16 @@ def crop_box(name, box, width=900):
 
 
 LOGO = uri(load('logo-rehab-division.png', bg='#FFFFFF'), 900)
+
+PORTAL = 'https://ps.btl.gov.il/'
+
+
+def qr_uri(data, scale=12):
+    """A code to scan, for whoever is holding the guide on paper."""
+    buf = io.BytesIO()
+    segno.make(data, error='m').save(buf, kind='png', scale=scale, border=2,
+                                     dark='#14477E', light='#FFFFFF')
+    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
 
 CSS_COMMON = FONT_CSS + """
 *{box-sizing:border-box}
@@ -198,13 +226,26 @@ dl.faq dd:last-of-type{border-bottom:none}
   break-after:page}
 .cover img{width:52%;max-width:250px;margin-bottom:2em}
 .cover .sub{color:#4E6076}
-.cover .foot{margin-top:auto;color:#7C93AC}
+.cover .qr{margin-top:auto;display:flex;align-items:center;gap:1em;
+  border:1px solid #D3DDE7;border-radius:8px;padding:.8em .9em}
+.cover .qr img{width:26%;max-width:110px;margin:0;flex:none}
+.cover .qr b{display:block;color:#14477E;font-family:'Rubik';line-height:1.35}
+.cover .qr .url{display:block;margin-top:.15em;font-family:'Rubik';font-weight:600;
+  color:#16202B;unicode-bidi:isolate;word-break:break-all}
+.cover .qr .hint{display:block;margin-top:.3em;color:#4E6076;line-height:1.4}
+.cover .foot{margin-top:1.2em;color:#7C93AC}
 """
 
 SIZES = {
-    'mobile': ("@page{size:100mm 178mm;margin:9mm 8mm}"
+    'mobile': ("@page{size:100mm 2600mm;margin:9mm 8mm}"
                "body{font-size:9.6pt}h1{font-size:20pt}h2{font-size:13pt}h3{font-size:11pt}"
-               "section{break-inside:auto;margin-bottom:1.3em}.bx i{width:17px;height:17px;font-size:9px;right:-10px;border-width:2px}"
+               "section{break-inside:auto;margin-bottom:3.2em}"
+               ".cover{min-height:auto;break-after:auto;margin-bottom:2.6em;"
+               "padding-bottom:1.6em;border-bottom:1px solid #D3DDE7}"
+               ".cover img{margin-bottom:1.1em}.cover .qr{margin-top:1.2em}"
+               ".cover .foot{margin-top:.9em}"
+               "section.newpage{break-before:auto}"
+               ".bx i{width:17px;height:17px;font-size:9px;right:-10px;border-width:2px}"
                ".bx{border-width:2px}figcaption{font-size:8.8pt}",
                'מובייל'),
     'desktop': ("@page{size:A4;margin:20mm 22mm}"
@@ -220,6 +261,12 @@ after = [s for s in scenes if s['type'] == 'points'][-1]
 tor = by_img['26-potential-tor.png']
 confirm = by_img['05-form-confirmation.png']
 inv_sent = inv_by['32-invoice-confirmation.png']
+# the same boxes the video draws on the upload page, numbered in the order they are
+# used. The video measures a highlight from the left edge; the guide places it from
+# the right, so the two disagree unless the box is flipped on the way in.
+upload_boxes = [{'color': h.get('c', '#14477E'), 'n': i + 1,
+                 'box': dict(h, x=round(100 - h['x'] - h['w'], 1))}
+                for i, h in enumerate(inv_by['33-upload-documents.png']['highlights'])]
 
 
 _faq = []
@@ -252,6 +299,11 @@ def routes(f):
 def cover(title, sub):
     return (f"<div class='cover'><img src='{LOGO}' alt='הביטוח הלאומי · אגף שיקום'>"
             f"<h1>{esc(title)}</h1><div class='sub'>{esc(sub)}</div>"
+            f"<div class='qr'><img src='{qr_uri(PORTAL)}' alt='קוד לסריקה'>"
+            "<div><b>לאזור האישי באתר הביטוח הלאומי</b>"
+            f"<span class='url' dir='ltr'>{PORTAL}</span>"
+            "<span class='hint'>סרקו את הקוד בטלפון, או הקלידו את הכתובת בדפדפן.</span>"
+            "</div></div>"
             "<div class='foot'>הביטוח הלאומי · אגף שיקום</div></div>")
 
 
@@ -291,9 +343,8 @@ def general_html():
   {figure('09-entry-page-clean.png', caption='עמוד הכניסה למצפן.')}
   {faq('כניסה ומי רואה מה',
        ('אני לא מוצא את "מצפן הזכויות שלי" בתפריט. למה?',
-        'בשלב זה המצפן מוצג למי שיש לו תיק איבה מוכר, למשפחות שכולות שהוכרו כתלויים, '
-        'ולהורים של ילדים קטינים עם תיק איבה או שיקום פעיל. אם אתם שייכים לאחת הקבוצות '
-        'ועדיין לא רואים את המצפן — פנו אלינו.'))}
+        'בשלב זה המצפן מוצג רק למשפחות שכולות. בהמשך הוא ייפתח לאוכלוסיות נוספות. '
+        'אם אתם שייכים ועדיין לא רואים את המצפן — פנו אלינו.'))}
 </section>
 
 <section>
@@ -423,8 +474,19 @@ def invoice_html():
   <p>מחפשים אותה בהטבות הפוטנציאליות. שימו לב: בשלב זה עדיין לא כל ההטבות
      הפוטנציאליות פתוחות להגשת חשבוניות דרך המצפן. {esc(inv_fork['hint'])}</p>
   <div class="routes">{routes(inv_fork)}</div>
-  <div class="note"><b>כשלא מופיע "הגשת בקשה", ההגשה אינה נעשית במצפן.</b>
-    במקרה כזה מגישים את החשבונית בשליחת מסמכים לפקיד. [[פרטים]]</div>
+  <h3>כשלא מופיע "הגשת בקשה"</h3>
+  <p>במקרה כזה ההגשה אינה נעשית במצפן, אלא באמצעות <b>העלאת מסמכים</b> באזור האישי:</p>
+  <ol class="steps">
+    <li>בתפריט "פעולות באתר" בוחרים <b>העלאת מסמכים</b>.</li>
+    <li>בשדה <b>נושא</b> בוחרים <b>שיקום</b>.</li>
+    <li>בשדה <b>קטגוריה</b> בוחרים <b>פניות</b>.</li>
+    <li>בשדה <b>מסמך</b> בוחרים <b>פנייה</b>.</li>
+    <li>לוחצים <b>צרף קובץ</b> ומצרפים את החשבונית או הקבלה.</li>
+    <li>לוחצים <b>שלח מסמך</b>.</li>
+  </ol>
+  {figure('33-upload-documents.png', boxes=upload_boxes,
+          mzoom={'x': 0.0, 'y': 0.23, 'w': 0.80, 'h': 0.57},
+          caption='עמוד "העלאת מסמכים" באזור האישי, לפי סדר השלבים.')}
 </section>
 
 <section>
@@ -487,6 +549,31 @@ def invoice_html():
 """
 
 
+def trim_tail(path, pad_mm=9):
+    """The phone page is deliberately far taller than the guide, so that nothing
+    is cut in half. Cut the empty tail back to where the last thing on it ends."""
+    import pymupdf
+    doc = pymupdf.open(path)
+    page = doc[0]
+    # a coarse render, read from the bottom up: the last row that is not paper
+    dpi = 18
+    pm = page.get_pixmap(dpi=dpi, colorspace=pymupdf.csGRAY)
+    row = pm.width * pm.n
+    bottom = 0
+    for y in range(pm.height - 1, -1, -1):
+        line = pm.samples[y * pm.stride:y * pm.stride + row]
+        if min(line) < 245:
+            bottom = (y + 1) * 72 / dpi
+            break
+    r = page.rect
+    page.set_cropbox(pymupdf.Rect(0, 0, r.width,
+                                  min(r.height, bottom + pad_mm * 72 / 25.4)))
+    tmp = path + '.tmp'
+    doc.save(tmp)
+    doc.close()
+    os.replace(tmp, path)
+
+
 GUIDES = [('מדריך מצפן זכויות איבה', general_html),
           ('מדריך הגשת חשבונית או קבלה', invoice_html)]
 
@@ -504,4 +591,6 @@ for name, build in GUIDES:
                         '--no-pdf-header-footer', f'--print-to-pdf={pdf}',
                         '--virtual-time-budget=20000', 'file://' + hp], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if MOBILE:
+            trim_tail(pdf)
         print('wrote', os.path.relpath(pdf, ROOT), f'{os.path.getsize(pdf)/1e6:.1f} MB')
