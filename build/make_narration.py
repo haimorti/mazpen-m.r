@@ -2,73 +2,22 @@
 """Build the narration script for a guide video: one line per frame, with the
 timecode it starts at and how long it has to be read in.
 
-Scenes that hold several frames — the statuses, the walk down a page, the two
-buttons — get a line per frame instead of one block, so the narrator lands on
-each beat as it appears.
-
 Usage: python3 build/make_narration.py [--scenes scenes.json]
 Output: video/<name>-narration.md, and a print-ready PDF beside the guides.
 """
 import json, os, subprocess, sys, shutil, html, base64
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import narration
+from narration import ROOT, tc
+
 SCENES = sys.argv[sys.argv.index('--scenes') + 1] if '--scenes' in sys.argv else 'scenes.json'
 STEM = os.path.splitext(os.path.basename(SCENES))[0]
 OUT = os.path.join(ROOT, 'build', 'out') if STEM == 'scenes' \
     else os.path.join(ROOT, 'build', 'out', STEM)
 FONTS = os.path.join(ROOT, 'build', 'fonts')
-WPS = 2.6                       # Hebrew words a second, read calmly
-
-scenes = json.load(open(os.path.join(ROOT, 'build', SCENES), encoding='utf-8'))
 esc = html.escape
-
-
-def tc(t):
-    m, s = divmod(int(round(t)), 60)
-    return f'{m}:{s:02d}'
-
-
-def lines_for(s):
-    """(text, share) per frame. share=None means the scene's single line."""
-    t = s['type']
-    if t == 'statuslist':
-        out = []
-        if s.get('intro'):
-            out.append((s['intro']['cap'], s['intro']['dur']))
-        share = (s['dur'] - sum(s[k]['dur'] for k in ('intro', 'outro') if s.get(k))) \
-            / len(s['items'])
-        for it in s['items']:
-            out.append((it['note'], share))
-        if s.get('outro'):
-            out.append((s['outro']['cap'], s['outro']['dur']))
-        return out
-    if t == 'walk':
-        return [(st['cap'], st['dur']) for st in s['steps']]
-    if t == 'fork':
-        c0, c1 = s['cols']
-        d = [f['dur'] for f in s['frames']]
-        strip = lambda x: x.replace('<b>', '').replace('</b>', '')
-        return [(s['hint'] + ' ' + strip(c0['said']) + '.', d[0]),
-                (c0['dest'] + '.', d[1]),
-                (strip(c1['said']) + '.', d[2]),
-                (c1['dest'] + '.', d[3])]
-    return [(s.get('vo', ''), None)]
-
-
-rows, t = [], 0.0
-for i, s in enumerate(scenes):
-    frames = lines_for(s)
-    at = t
-    for k, (text, dur) in enumerate(frames):
-        d = s['dur'] if dur is None else dur
-        words = len(text.split())
-        est = words / WPS
-        rows.append({'n': i + 1, 'sub': k + 1 if len(frames) > 1 else 0,
-                     'title': s.get('title', ''), 'at': at, 'dur': d,
-                     'text': text, 'words': words, 'est': est,
-                     'tight': est > d - 0.3})
-        at += d
-    t += s['dur']
+rows, t, scenes = narration.rows(SCENES)
 
 # ---------------------------------------------------------------- markdown
 md = [f'# קריינות — {scenes[0]["title"]}', '',
