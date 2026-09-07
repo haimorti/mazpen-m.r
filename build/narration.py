@@ -20,7 +20,7 @@ def lines_for(s):
             out.append((s['intro']['cap'], s['intro']['dur']))
         share = (s['dur'] - sum(s[k]['dur'] for k in ('intro', 'outro') if s.get(k))) \
             / len(s['items'])
-        out += [(it['note'], share) for it in s['items']]
+        out += [(it['note'], it.get('dur', share)) for it in s['items']]
         if s.get('outro'):
             out.append((s['outro']['cap'], s['outro']['dur']))
         return out

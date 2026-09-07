@@ -581,7 +581,7 @@ for idx, s in enumerate(scenes):
         seq = [('intro', None, s['intro']['dur'])] if s.get('intro') else []
         wide = sum(s[k]['dur'] for k in ('intro', 'outro') if s.get(k))
         share = (s['dur'] - wide) / len(s['items'])
-        seq += [('cards', i + 1, share) for i in range(len(s['items']))]
+        seq += [('cards', i + 1, it.get('dur', share)) for i, it in enumerate(s['items'])]
         if s.get('outro'):
             seq.append(('outro', None, s['outro']['dur']))
         for k, (phase, lit, d) in enumerate(seq):

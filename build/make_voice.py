@@ -121,7 +121,6 @@ def fit(rows, secs, pad=0.5):
                 fr['dur'] = d
             s['dur'] = sum(frames)
         elif s['type'] == 'statuslist':
-            # the middle frames share one duration, so they all take the longest need
             head_ = frames[0] if s.get('intro') else 0
             tail_ = frames[-1] if s.get('outro') else 0
             mid = frames[1 if s.get('intro') else 0:len(frames) - (1 if s.get('outro') else 0)]
@@ -129,8 +128,14 @@ def fit(rows, secs, pad=0.5):
                 s['intro']['dur'] = head_
             if s.get('outro'):
                 s['outro']['dur'] = tail_
-            s['dur'] = round(head_ + max(mid) * len(mid) + tail_, 1)
+            for it, d in zip(s['items'], mid):
+                it['dur'] = d
+            s['dur'] = round(head_ + sum(mid) + tail_, 1)
         else:
+            if s.get('cursor') and s['dur']:
+                scale = frames[0] / s['dur']
+                for w in s['cursor']:
+                    w['t'] = round(w['t'] * scale, 2)
             s['dur'] = frames[0]
     json.dump(scenes, open(os.path.join(ROOT, 'build', SCENES), 'w', encoding='utf-8'),
               ensure_ascii=False, indent=2)
