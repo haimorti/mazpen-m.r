@@ -12,7 +12,7 @@ FFMPEG="${FFMPEG:-$(command -v ffmpeg || python3 -c 'import imageio_ffmpeg;print
 FPS=25
 
 SCENES=scenes.json
-NAME="הסבר כללי מצפן זכויות איבה"
+NAME=""
 ARGS=()
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -22,6 +22,14 @@ while [ $# -gt 0 ]; do
   esac
 done
 STEM="${SCENES%.json}"
+# the name belongs to the scenes file, so a rebuild cannot label one cut as the other
+if [ -z "$NAME" ]; then
+  case "$SCENES" in
+    scenes-invoice.json) NAME="הגשת חשבונית או קבלה - מצפן זכויות איבה";;
+    scenes.json)         NAME="הסבר כללי מצפן זכויות איבה";;
+    *)                   NAME="$STEM";;
+  esac
+fi
 OUTDIR="$ROOT/build/out"; [ "$STEM" = scenes ] || OUTDIR="$OUTDIR/$STEM"
 
 python3 "$ROOT/build/make_cursor.py"

@@ -144,8 +144,11 @@ def fit(rows, secs, pad=0.5):
 
 def mux(rows):
     """Pad each clip out to its frame, join them, and lay the result under the cut."""
-    silent = [f for f in os.listdir(OUT)
-              if f.endswith('.mp4') and 'קריינות' not in f][0]
+    cuts = [f for f in os.listdir(OUT)
+            if f.endswith('.mp4') and 'קריינות' not in f]
+    if not cuts:
+        sys.exit(f'no cut to lay the voice under in {os.path.relpath(OUT, ROOT)}')
+    silent = max(cuts, key=lambda f: os.path.getmtime(os.path.join(OUT, f)))
     parts = []
     for i, r in enumerate(rows):
         src = os.path.join(VOICE_DIR, f'{i+1:02d}.mp3')
