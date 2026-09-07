@@ -13,6 +13,9 @@ appended. Runs in four steps, any of which can be repeated on its own:
   python3 build/make_voice.py --voice <id> --fit --rebuild    # ...and re-cut
   python3 build/make_voice.py --mux                           # lay the track down
 
+Clips made elsewhere work too: drop one mp3 per line in build/out/voice as
+01.mp3 … NN.mp3 and run --fit --rebuild --mux; no key is needed for that.
+
 The key comes from ELEVENLABS_API_KEY (or --key). Pick a voice with
 --list-voices; the model defaults to one that speaks Hebrew, override with
 --model if your account has a newer one.
@@ -141,7 +144,23 @@ if '--list-voices' in sys.argv:
         print(v['voice_id'], '|', v['name'], '|', ', '.join(v.get('labels', {}).values()))
     sys.exit()
 
-if '--mux' in sys.argv:
+# --- everything after synthesis works on clips that are already there, so a
+# --- track made elsewhere can be fitted and laid down without a key
+if '--mux' in sys.argv or ('--fit' in sys.argv and not KEY):
+    if not os.path.isdir(VOICE_DIR):
+        sys.exit(f'no clips in {os.path.relpath(VOICE_DIR, ROOT)} — '
+                 'put one mp3 per narration line there, named 01.mp3 … '
+                 f'{len(rows):02d}.mp3')
+    missing = [i + 1 for i in range(len(rows))
+               if not os.path.exists(os.path.join(VOICE_DIR, f'{i+1:02d}.mp3'))]
+    if missing:
+        sys.exit(f'missing clips: {missing}')
+    if '--fit' in sys.argv:
+        fit(rows, measured(rows))
+        if '--rebuild' in sys.argv:
+            subprocess.run(['bash', os.path.join(ROOT, 'build', 'build-video.sh'),
+                            '--scenes', SCENES], check=True)
+            rows = narration.rows(SCENES)[0]
     mux(rows)
     sys.exit()
 
