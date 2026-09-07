@@ -1,7 +1,7 @@
 [
  {
   "slide": "01.png",
-  "dur": 4
+  "dur": 6
  },
  {
   "slide": "02a.png",
@@ -255,32 +255,6 @@
  },
  {
   "slide": "09.png",
-  "dur": 12,
-  "motion": {
-   "cursor": [
-    {
-     "t": 0.0,
-     "x": 1022,
-     "y": 1081,
-     "click": false
-    },
-    {
-     "t": 3.2,
-     "x": 1422,
-     "y": 844,
-     "click": true
-    },
-    {
-     "t": 11.4,
-     "x": 1422,
-     "y": 844,
-     "click": false
-    }
-   ]
-  }
- },
- {
-  "slide": "10.png",
   "dur": 7,
   "motion": {
    "cursor": [
@@ -306,7 +280,7 @@
   }
  },
  {
-  "slide": "11.png",
+  "slide": "10.png",
   "dur": 7,
   "motion": {
    "cursor": [
@@ -332,19 +306,23 @@
   }
  },
  {
-  "slide": "12a.png",
+  "slide": "11a.png",
   "dur": 7
+ },
+ {
+  "slide": "11b.png",
+  "dur": 6
+ },
+ {
+  "slide": "12a.png",
+  "dur": 6
  },
  {
   "slide": "12b.png",
   "dur": 6
  },
  {
-  "slide": "13a.png",
-  "dur": 6
- },
- {
-  "slide": "13b.png",
+  "slide": "13.png",
   "dur": 6
  },
  {
@@ -353,14 +331,36 @@
  },
  {
   "slide": "15.png",
-  "dur": 6
- },
- {
-  "slide": "16.png",
   "dur": 9
  },
  {
+  "slide": "16.png",
+  "dur": 12,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 1022,
+     "y": 1081,
+     "click": false
+    },
+    {
+     "t": 3.2,
+     "x": 1422,
+     "y": 844,
+     "click": true
+    },
+    {
+     "t": 11.4,
+     "x": 1422,
+     "y": 844,
+     "click": false
+    }
+   ]
+  }
+ },
+ {
   "slide": "17.png",
-  "dur": 5
+  "dur": 7
  }
 ]

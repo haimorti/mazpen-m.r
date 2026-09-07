@@ -279,7 +279,10 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
   gap:24px;padding:0 200px;text-align:center}
 .mark{position:absolute;top:64px;right:80px;height:110px}
 .center h1{font-family:'Rubik';font-weight:700;font-size:100px;margin:0;color:#14477E;line-height:1.1;letter-spacing:-.02em}
-.center .sub{font-size:44px;color:#4A5C70;font-weight:600}
+.center .tag{font-family:'Rubik';font-weight:600;font-size:40px;color:#14477E;
+  background:#DCE9F7;border-radius:999px;padding:10px 40px;margin:6px 0 2px}
+.center .sub{font-size:44px;color:#4A5C70;font-weight:600;max-width:1280px;text-align:center;
+  line-height:1.35}
 
 .body{position:absolute;top:132px;right:120px;left:120px;bottom:80px;display:flex;flex-direction:column;justify-content:center}
 .hero{font-family:'Rubik';font-weight:700;font-size:76px;color:#14477E;text-align:center;margin:0 0 44px;
@@ -342,6 +345,7 @@ def render(scene, total, step=None):
     if t == 'title':
         body = (f"<img class='mark' src='{LOGO}' alt=''>"
                 f"<div class='center'><h1>{esc(scene['title'])}</h1>"
+                + (f"<div class='tag'>{esc(scene['tag'])}</div>" if scene.get('tag') else '')
                 + (f"<div class='sub'>{esc(scene['sub'])}</div>" if scene.get('sub') else '')
                 + "</div>")
     elif t == 'points':
