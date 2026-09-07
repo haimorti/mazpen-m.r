@@ -18,7 +18,8 @@ Clips made elsewhere work too: drop one mp3 per line in build/out/voice as
 
 The key comes from ELEVENLABS_API_KEY (or --key). Pick a voice with
 --list-voices; the model defaults to one that speaks Hebrew, override with
---model if your account has a newer one.
+--model. eleven_multilingual_v2 does NOT speak Hebrew — it reads the text
+as Latin transliteration.
 """
 import json, os, subprocess, sys, shutil, urllib.request, urllib.error
 
@@ -36,7 +37,7 @@ KEY = (sys.argv[sys.argv.index('--key') + 1] if '--key' in sys.argv
        else os.environ.get('ELEVENLABS_API_KEY', ''))
 VOICE = sys.argv[sys.argv.index('--voice') + 1] if '--voice' in sys.argv else ''
 MODEL = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv \
-    else 'eleven_multilingual_v2'
+    else 'eleven_v3'          # multilingual_v2 transliterates Hebrew, it does not speak it
 FFMPEG = (shutil.which('ffmpeg')
           or subprocess.run([sys.executable, '-c',
                              'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],
@@ -105,11 +106,15 @@ def fit(rows, secs, pad=0.5):
                 fr['dur'] = d
             s['dur'] = sum(frames)
         elif s['type'] == 'statuslist':
+            # the middle frames share one duration, so they all take the longest need
+            head_ = frames[0] if s.get('intro') else 0
+            tail_ = frames[-1] if s.get('outro') else 0
+            mid = frames[1 if s.get('intro') else 0:len(frames) - (1 if s.get('outro') else 0)]
             if s.get('intro'):
-                s['intro']['dur'] = frames[0]
+                s['intro']['dur'] = head_
             if s.get('outro'):
-                s['outro']['dur'] = frames[-1]
-            s['dur'] = sum(frames)
+                s['outro']['dur'] = tail_
+            s['dur'] = round(head_ + max(mid) * len(mid) + tail_, 1)
         else:
             s['dur'] = frames[0]
     json.dump(scenes, open(os.path.join(ROOT, 'build', SCENES), 'w', encoding='utf-8'),

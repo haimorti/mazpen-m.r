@@ -1,7 +1,7 @@
 [
  {
   "slide": "01.png",
-  "dur": 5
+  "dur": 5.2
  },
  {
   "slide": "02a.png",
@@ -21,7 +21,7 @@
  },
  {
   "slide": "03.png",
-  "dur": 7,
+  "dur": 8.2,
   "motion": {
    "cursor": [
     {
@@ -67,7 +67,7 @@
  },
  {
   "slide": "06.png",
-  "dur": 7
+  "dur": 7.1
  },
  {
   "slide": "07.png",
@@ -111,27 +111,27 @@
  },
  {
   "slide": "10a.png",
-  "dur": 8
+  "dur": 10.3
  },
  {
   "slide": "10b.png",
-  "dur": 5.0
+  "dur": 7.2
  },
  {
   "slide": "10c.png",
-  "dur": 5.0
+  "dur": 7.2
  },
  {
   "slide": "10d.png",
-  "dur": 5.0
+  "dur": 7.2
  },
  {
   "slide": "10e.png",
-  "dur": 5.0
+  "dur": 7.2
  },
  {
   "slide": "10f.png",
-  "dur": 5.0
+  "dur": 7.2
  },
  {
   "slide": "10g.png",
@@ -161,15 +161,15 @@
  },
  {
   "slide": "11a.png",
-  "dur": 7
+  "dur": 8.0
  },
  {
   "slide": "11b.png",
-  "dur": 8
+  "dur": 10.1
  },
  {
   "slide": "11c.png",
-  "dur": 6
+  "dur": 6.4
  },
  {
   "slide": "11d.png",
@@ -181,7 +181,7 @@
  },
  {
   "slide": "12.png",
-  "dur": 11,
+  "dur": 14.3,
   "motion": {
    "cursor": [
     {
@@ -213,11 +213,11 @@
  },
  {
   "slide": "13.png",
-  "dur": 11
+  "dur": 14.7
  },
  {
   "slide": "14a.png",
-  "dur": 6,
+  "dur": 8.4,
   "motion": {
    "cursor": [
     {
@@ -226,13 +226,13 @@
      "y": 980
     },
     {
-     "t": 3.4,
+     "t": 4.76,
      "x": 1425,
      "y": 246,
      "click": true
     },
     {
-     "t": 5.8,
+     "t": 8.12,
      "x": 1425,
      "y": 246
     }
