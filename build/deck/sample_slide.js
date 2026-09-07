@@ -13,7 +13,7 @@ const rtl = { fontFace: F, rtlMode: true, align: 'right', isTextBox: true };
 const ctr = { fontFace: F, rtlMode: true, align: 'center', isTextBox: true, margin: 0 };
 
 const s = pres.addSlide();
-s.addImage({ path: path.join(A, 'bg_dark.png'), x: 0, y: 0, w: 13.33, h: 7.5 });
+s.addImage({ path: path.join(A, 'bg_dusk.jpg'), x: 0, y: 0, w: 13.33, h: 7.5 });
 
 // ---- the head
 s.addText('מ ס ל ו ל   ה ה ט ב ה', {

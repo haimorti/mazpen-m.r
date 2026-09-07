@@ -9,27 +9,27 @@ const F = 'Arial', W = 13.33;
 // each theme says how the words and the pills sit on its ground
 const THEMES = {
   dawn: {
-    label: 'שחר', bg: 'bg_dawn.png', dark: false,
+    label: 'שחר', bg: 'bg_dawn.jpg', dark: false,
     ink: '1B2C3E', head: '17395F', muted: '6B7C8C', track: 'D8CFC4', eyebrow: 'A08A72',
     note: { fill: 'FFFFFF', line: 'E4D8C9' },
   },
   sky: {
-    label: 'שמיים', bg: 'bg_sky.png', dark: false,
+    label: 'שמיים', bg: 'bg_sky.jpg', dark: false,
     ink: '16283C', head: '14477E', muted: '5D7A96', track: 'CBDCEC', eyebrow: '86A6C4',
     note: { fill: 'FFFFFF', line: 'D3E2F0' },
   },
   sand: {
-    label: 'חול', bg: 'bg_sand.png', dark: false,
+    label: 'חול', bg: 'bg_sand.jpg', dark: false,
     ink: '2A2721', head: '3E5A72', muted: '7A7266', track: 'DED3C2', eyebrow: 'A2937E',
     note: { fill: 'FFFFFF', line: 'E6DCCB' },
   },
   sage: {
-    label: 'מרווה', bg: 'bg_sage.png', dark: false,
+    label: 'מרווה', bg: 'bg_sage.jpg', dark: false,
     ink: '1E2C24', head: '2C5A44', muted: '64796C', track: 'CBDCD0', eyebrow: '8AA394',
     note: { fill: 'FFFFFF', line: 'D6E4DA' },
   },
   dusk: {
-    label: 'דמדומים', bg: 'bg_dusk.png', dark: true,
+    label: 'דמדומים', bg: 'bg_dusk.jpg', dark: true,
     ink: 'FFFFFF', head: 'FFFFFF', muted: 'A9BFD8', track: '32506F', eyebrow: '7D9AB9',
     note: { fill: '1A3550', line: '2A5077' },
   },

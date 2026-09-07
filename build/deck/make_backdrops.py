@@ -10,7 +10,7 @@ import os
 import numpy as np
 from PIL import Image, ImageFilter
 
-W, H = 2666, 1500
+W, H = 1920, 1080   # a projector never shows more, and the deck stays small
 DEST = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
 os.makedirs(DEST, exist_ok=True)
 
@@ -34,7 +34,7 @@ def backdrop(base, lights, vignette=0.0):
         out *= (1 - np.clip(d, 0, 1) ** 2 * vignette)[..., None]
     out += np.random.default_rng(7).normal(0, 1.1, out.shape)   # break up the banding
     im = Image.fromarray(np.clip(out, 0, 255).astype('uint8'))
-    return im.filter(ImageFilter.GaussianBlur(1.2))
+    return im.filter(ImageFilter.GaussianBlur(1.0))
 
 
 RECIPES = {
@@ -66,5 +66,7 @@ RECIPES = {
 
 if __name__ == '__main__':
     for name, (base, lights, vig) in RECIPES.items():
-        backdrop(base, lights, vig).save(os.path.join(DEST, f'bg_{name}.png'))
+        # a smooth wash is all gradient, so JPEG keeps it tiny and the deck sendable
+        backdrop(base, lights, vig).save(os.path.join(DEST, f'bg_{name}.jpg'),
+                                         quality=90, subsampling=0, optimize=True)
         print('wrote', name)

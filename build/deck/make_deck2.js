@@ -37,7 +37,7 @@ function ground(bg) {
 }
 
 function page(title, kicker) {
-  const s = ground('bg_sage.png');
+  const s = ground('bg_sage.jpg');
   s.addText(title, { ...rtl, x: M, y: 0.5, w: W - 2 * M, h: 0.7, fontSize: 34, bold: true, color: NAVY });
   if (kicker) s.addText(kicker, { ...rtl, x: M, y: 1.18, w: W - 2 * M, h: 0.4, fontSize: 15.5, color: MUTED });
   s.addText('מצפן זכויות איבה · הביטוח הלאומי, אגף שיקום', {
@@ -47,7 +47,7 @@ function page(title, kicker) {
 }
 
 function dark(eyebrow, title, note, o = {}) {
-  const s = ground('bg_forest.png');
+  const s = ground('bg_forest.jpg');
   const y = o.y !== undefined ? o.y : 2.8;
   s.addImage({ path: path.join(A, 'logo.png'), x: W - M - 1.7, y: 0.5, w: 1.7, h: 0.62 });
   if (eyebrow) s.addText(eyebrow, { ...rtl, x: M, y: y - 0.42, w: W - 2 * M, h: 0.36, fontSize: 15, color: '8FC7AC', bold: true });
@@ -91,7 +91,7 @@ function arrow(s, x, y, w = 0.34) {
 
 // ================================================================ 1 · cover
 {
-  const s = ground('bg_forest.png');
+  const s = ground('bg_forest.jpg');
   s.addImage({ path: path.join(A, 'logo.png'), x: W - M - 2.0, y: 0.55, w: 2.0, h: 0.73 });
   s.addText('הביטוח הלאומי · אגף שיקום', { ...rtl, x: M, y: 2.35, w: W - 2 * M, h: 0.4, fontSize: 18, color: '8FC7AC', bold: true });
   s.addText('מצפן זכויות איבה', { ...rtl, x: M, y: 2.8, w: W - 2 * M, h: 1.35, fontSize: 62, bold: true, color: 'FFFFFF' });
