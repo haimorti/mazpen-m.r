@@ -97,6 +97,8 @@ def fit(im, big=False):
     by more than a quarter, so nothing looks stretched or soft. A "big" scene trades
     caption height for stage height, so a dense screen reads at close to 1:1."""
     mh, mu = (BIG_H, BIG_UPSCALE) if big else (MAX_H, MAX_UPSCALE)
+    if big == 'top':
+        mh, mu = 840, 1.45
     w = min(MAX_W, im.width * mu, im.width * mh / im.height)
     return round(w), round(w * im.height / im.width)
 
@@ -105,14 +107,31 @@ def cursor_track(scene, waypoints, big=False):
     """Fractional waypoints on the screenshot -> pixels on the 1920x1080 slide."""
     im = shot_im(scene)
     dw, dh = fit(im, big)                      # same size the slide renders it at
-    left, top = (1920 - dw) / 2, 132 + ((762 if big else stage_h(scene)) - dh) / 2
+    left = (1920 - dw) / 2
+    top = stage_top(scene) + ((762 if big and not scene.get('topcap')
+                               else stage_h(scene)) - dh) / 2
     return {'cursor': [{'t': w['t'], 'x': round(left + w['x'] * dw),
                         'y': round(top + w['y'] * dh), 'click': bool(w.get('click'))}
                        for w in waypoints]}
 
 
+def marks(scene):
+    """Every box drawn over a screenshot: one `highlight`, or a list of them."""
+    hls = scene.get('highlights') or ([scene['highlight']] if scene.get('highlight') else [])
+    return ''.join(
+        f"<div class='hl' style='left:{h['x']}%;top:{h['y']}%;width:{h['w']}%;"
+        f"height:{h['h']}%" + (f";border-color:{h['c']};box-shadow:0 0 0 5px {h['c']}28"
+                               if h.get('c') else '') + "'></div>" for h in hls)
+
+
+def stage_top(scene):
+    return 186 if scene.get('topcap') else 132
+
+
 def stage_h(scene):
     """Logical height of the stage box, which the cursor track has to agree with."""
+    if scene.get('topcap'):
+        return 1080 - 186 - 44
     return 762 if scene.get('big') else 712
 
 
@@ -244,6 +263,9 @@ body{margin:0;position:relative;width:1920px;height:1080px;overflow:hidden;backg
 .shot img{display:block;width:100%;max-width:none;max-height:none;height:auto}
 .hl{position:absolute;border:5px solid #DC2626;border-radius:10px;
   box-shadow:0 0 0 5px rgba(220,38,38,.16)}
+.stage.topped{top:186px;bottom:44px}
+.topcap{position:absolute;top:116px;right:64px;left:64px;text-align:center;
+  font-size:32px;font-weight:700;line-height:1.3}
 .stage.tall{bottom:186px}
 .cap.slim{bottom:52px;min-height:106px;font-size:32px;padding:14px 34px}
 .cap{position:absolute;right:64px;left:64px;bottom:60px;min-height:120px;background:#16202B;color:#fff;
@@ -496,17 +518,21 @@ def render(scene, total, step=None):
         im = shot_im(scene)
         if scene.get('focus'):
             im = spotlight(im, scene['focus'])
-        sw, sh = fit(im, big)
-        hl = scene.get('highlight')
-        hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
-                  f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+        sw, sh = fit(im, 'top' if scene.get('topcap') else big)
+        hl_div = marks(scene)
         cap = esc(scene['cap'])
         if scene.get('cap_title'):
             cap = f"<div class='ct'>{esc(scene['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
-        body = (head + f"<div class='stage{' tall' if big else ''}'><div class='frame'>"
-                f"<div class='shot' style='width:{sw}px'>"
-                f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
-                f"<div class='cap{' slim' if big else ''}'>{cap}</div>")
+        if scene.get('topcap'):
+            body = (head + f"<div class='topcap'>{esc(scene['topcap'])}</div>"
+                    f"<div class='stage topped'><div class='frame'>"
+                    f"<div class='shot' style='width:{sw}px'>"
+                    f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>")
+        else:
+            body = (head + f"<div class='stage{' tall' if big else ''}'><div class='frame'>"
+                    f"<div class='shot' style='width:{sw}px'>"
+                    f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
+                    f"<div class='cap{' slim' if big else ''}'>{cap}</div>")
 
     tag = f"{n:02d}" if step is None else f"{n:02d}{chr(97 + step)}"
     hpath = os.path.join(SLIDES, f"{tag}.html")
@@ -575,7 +601,7 @@ for idx, s in enumerate(scenes):
     print('rendered', os.path.basename(p))
     m = None
     if s.get('cursor') and s.get('img'):
-        m = cursor_track(s, s['cursor'], big=s.get('big'))
+        m = cursor_track(s, s['cursor'], big='top' if s.get('topcap') else s.get('big'))
     elif s.get('focus') and not s.get('static'):
         im = load_shot(s['img'])
         disp_h = 1792 * im.height / im.width          # image height at the fixed focus layout

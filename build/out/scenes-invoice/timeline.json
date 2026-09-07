@@ -55,42 +55,38 @@
  },
  {
   "slide": "04.png",
-  "dur": 9
- },
- {
-  "slide": "05.png",
-  "dur": 7,
+  "dur": 11,
   "motion": {
    "cursor": [
     {
      "t": 0.0,
      "x": 960,
-     "y": 948,
+     "y": 894,
      "click": false
     },
     {
-     "t": 2.4,
-     "x": 1202,
-     "y": 376,
+     "t": 6.6,
+     "x": 960,
+     "y": 894,
+     "click": false
+    },
+    {
+     "t": 9.0,
+     "x": 602,
+     "y": 476,
      "click": true
     },
     {
-     "t": 4.6,
-     "x": 576,
-     "y": 500,
-     "click": true
-    },
-    {
-     "t": 6.2,
-     "x": 576,
-     "y": 500,
+     "t": 10.4,
+     "x": 602,
+     "y": 476,
      "click": false
     }
    ]
   }
  },
  {
-  "slide": "06.png",
+  "slide": "05.png",
   "dur": 6,
   "motion": {
    "cursor": [
@@ -116,7 +112,7 @@
   }
  },
  {
-  "slide": "07.png",
+  "slide": "06.png",
   "dur": 8,
   "motion": {
    "cursor": [
@@ -142,7 +138,7 @@
   }
  },
  {
-  "slide": "08.png",
+  "slide": "07.png",
   "dur": 7,
   "motion": {
    "cursor": [
@@ -174,7 +170,7 @@
   }
  },
  {
-  "slide": "09a.png",
+  "slide": "08a.png",
   "dur": 4,
   "motion": {
    "cursor": [
@@ -198,7 +194,7 @@
   }
  },
  {
-  "slide": "09b.png",
+  "slide": "08b.png",
   "dur": 3.5,
   "motion": {
    "cursor": [
@@ -216,7 +212,7 @@
   }
  },
  {
-  "slide": "09c.png",
+  "slide": "08c.png",
   "dur": 4,
   "motion": {
    "cursor": [
@@ -240,7 +236,7 @@
   }
  },
  {
-  "slide": "09d.png",
+  "slide": "08d.png",
   "dur": 3.5,
   "motion": {
    "cursor": [
@@ -258,11 +254,33 @@
   }
  },
  {
-  "slide": "10.png",
-  "dur": 6
+  "slide": "09.png",
+  "dur": 12,
+  "motion": {
+   "cursor": [
+    {
+     "t": 0.0,
+     "x": 1022,
+     "y": 1081,
+     "click": false
+    },
+    {
+     "t": 3.2,
+     "x": 1422,
+     "y": 844,
+     "click": true
+    },
+    {
+     "t": 11.4,
+     "x": 1422,
+     "y": 844,
+     "click": false
+    }
+   ]
+  }
  },
  {
-  "slide": "11.png",
+  "slide": "10.png",
   "dur": 7,
   "motion": {
    "cursor": [
@@ -288,7 +306,7 @@
   }
  },
  {
-  "slide": "12.png",
+  "slide": "11.png",
   "dur": 7,
   "motion": {
    "cursor": [
@@ -314,19 +332,23 @@
   }
  },
  {
-  "slide": "13a.png",
+  "slide": "12a.png",
   "dur": 7
+ },
+ {
+  "slide": "12b.png",
+  "dur": 6
+ },
+ {
+  "slide": "13a.png",
+  "dur": 6
  },
  {
   "slide": "13b.png",
   "dur": 6
  },
  {
-  "slide": "14a.png",
-  "dur": 6
- },
- {
-  "slide": "14b.png",
+  "slide": "14.png",
   "dur": 6
  },
  {
@@ -335,14 +357,10 @@
  },
  {
   "slide": "16.png",
-  "dur": 6
- },
- {
-  "slide": "17.png",
   "dur": 9
  },
  {
-  "slide": "18.png",
+  "slide": "17.png",
   "dur": 5
  }
 ]
