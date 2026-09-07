@@ -61,11 +61,25 @@ def audio_seconds(path):
     raise RuntimeError('could not read the length of ' + path)
 
 
+def spoken(text):
+    """The pointed twin of a narration line, when there is one.
+
+    video/nikud.json is written by build/nikud.py.  Only the engine sees the
+    points; the screen and the subtitles keep the plain text."""
+    path = os.path.join(ROOT, 'video', 'nikud.json')
+    if not os.path.exists(path):
+        return text
+    return json.load(open(path, encoding='utf-8')).get(text, text)
+
+
 def synth(rows):
     os.makedirs(VOICE_DIR, exist_ok=True)
+    pointed = 0
     for i, r in enumerate(rows):
         dest = os.path.join(VOICE_DIR, f'{i+1:02d}.mp3')
-        body = json.dumps({'text': r['text'], 'model_id': MODEL,
+        say = spoken(r['text'])
+        pointed += say != r['text']
+        body = json.dumps({'text': say, 'model_id': MODEL,
                            'voice_settings': {'stability': 0.5,
                                               'similarity_boost': 0.75,
                                               'speed': 1.0}}).encode()
@@ -77,6 +91,7 @@ def synth(rows):
         except Exception:
             got = '    ?'
         print(f'  {i+1:02d}  {got} / {r["dur"]:4}s  {r["text"][:52]}')
+    print(f'  {pointed} / {len(rows)} lines were sent with niqqud')
 
 
 def measured(rows):
