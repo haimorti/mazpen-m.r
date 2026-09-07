@@ -35,6 +35,11 @@ for r in rows:
 open(os.path.join(ROOT, 'video', f'{STEM}-narration.md'), 'w', encoding='utf-8')\
     .write('\n'.join(md) + '\n')
 
+json.dump([{'i': i + 1, 'at': round(r['at'], 2), 'dur': r['dur'], 'text': r['text']}
+           for i, r in enumerate(rows)],
+          open(os.path.join(ROOT, 'video', f'{STEM}-narration.json'), 'w', encoding='utf-8'),
+          ensure_ascii=False, indent=1)
+
 # ---------------------------------------------------------------- pdf
 chrome = None
 for c in ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome', shutil.which('chromium'),

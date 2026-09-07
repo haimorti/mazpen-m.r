@@ -71,7 +71,11 @@ def synth(rows):
         open(dest, 'wb').write(
             call(f'/text-to-speech/{VOICE}', body,
                  {'Content-Type': 'application/json', 'Accept': 'audio/mpeg'}))
-        print(f'  {i+1:02d}  {audio_seconds(dest):5.1f}s / {r["dur"]:4}s  {r["text"][:52]}')
+        try:                                   # ffmpeg is only needed to fit, not to speak
+            got = f'{audio_seconds(dest):5.1f}s'
+        except Exception:
+            got = '    ?'
+        print(f'  {i+1:02d}  {got} / {r["dur"]:4}s  {r["text"][:52]}')
 
 
 def measured(rows):
