@@ -11,29 +11,41 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WPS = 2.6                       # Hebrew words a second, read calmly
 
 
+def say(d, key):
+    """What is spoken over a frame.
+
+    A caption on a slide is read with the eye and wants to be short -- "פעילה:
+    ההטבה אושרה". The same words read aloud sound like someone reciting a table,
+    so a frame may carry a `vo` that says the same thing in a whole sentence.
+    Where there is none, the caption is spoken as it stands."""
+    return d.get('vo') or d[key]
+
+
 def lines_for(s):
     """(text, seconds) per frame of one scene; seconds None = the whole scene."""
     t = s['type']
     if t == 'statuslist':
         out = []
         if s.get('intro'):
-            out.append((s['intro']['cap'], s['intro']['dur']))
+            out.append((say(s['intro'], 'cap'), s['intro']['dur']))
         share = (s['dur'] - sum(s[k]['dur'] for k in ('intro', 'outro') if s.get(k))) \
             / len(s['items'])
-        out += [(it['note'], it.get('dur', share)) for it in s['items']]
+        out += [(say(it, 'note'), it.get('dur', share)) for it in s['items']]
         if s.get('outro'):
-            out.append((s['outro']['cap'], s['outro']['dur']))
+            out.append((say(s['outro'], 'cap'), s['outro']['dur']))
         return out
     if t == 'walk':
-        return [(st['cap'], st['dur']) for st in s['steps']]
+        return [(say(st, 'cap'), st['dur']) for st in s['steps']]
     if t == 'fork':
         c0, c1 = s['cols']
         d = [f['dur'] for f in s['frames']]
         strip = lambda x: x.replace('<b>', '').replace('</b>', '')
-        return [(s['hint'] + ' ' + strip(c0['said']) + '.', d[0]),
-                (c0['dest'] + '.', d[1]),
-                (strip(c1['said']) + '.', d[2]),
-                (c1['dest'] + '.', d[3])]
+        hint = s.get('vo_hint') or s['hint']
+        said = lambda c: strip(c.get('vo_said') or c['said'])
+        return [(hint + ' ' + said(c0) + '.', d[0]),
+                (say(c0, 'dest') + '.', d[1]),
+                (said(c1) + '.', d[2]),
+                (say(c1, 'dest') + '.', d[3])]
     return [(s.get('vo', ''), None)]
 
 
