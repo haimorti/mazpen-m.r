@@ -21,7 +21,7 @@
  },
  {
   "slide": "03.png",
-  "dur": 11.8,
+  "dur": 12.6,
   "motion": {
    "cursor": [
     {
@@ -31,25 +31,25 @@
      "click": false
     },
     {
-     "t": 2.3,
+     "t": 2.46,
      "x": 1353,
      "y": 546,
      "click": true
     },
     {
-     "t": 4.9,
+     "t": 5.23,
      "x": 1353,
      "y": 578,
      "click": true
     },
     {
-     "t": 7.77,
+     "t": 8.3,
      "x": 573,
      "y": 700,
      "click": true
     },
     {
-     "t": 9.5,
+     "t": 10.14,
      "x": 573,
      "y": 700,
      "click": false
@@ -111,19 +111,19 @@
  },
  {
   "slide": "10a.png",
-  "dur": 10.5
+  "dur": 11.5
  },
  {
   "slide": "10b.png",
-  "dur": 12.0
+  "dur": 12.6
  },
  {
   "slide": "10c.png",
-  "dur": 8.0
+  "dur": 8.8
  },
  {
   "slide": "10d.png",
-  "dur": 8.5
+  "dur": 8.6
  },
  {
   "slide": "11.png",
@@ -205,7 +205,7 @@
  },
  {
   "slide": "14.png",
-  "dur": 17.9
+  "dur": 18.2
  },
  {
   "slide": "15a.png",

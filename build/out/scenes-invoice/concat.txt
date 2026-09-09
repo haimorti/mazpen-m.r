@@ -17,13 +17,13 @@ duration 8
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/07.png'
 duration 15.0
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/08a.png'
-duration 10.8
+duration 11.5
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/08b.png'
 duration 4.1
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/08c.png'
 duration 4.7
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/08d.png'
-duration 3.5
+duration 3.9
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/09.png'
 duration 8.4
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/10.png'
