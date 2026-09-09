@@ -19,7 +19,9 @@ Clips made elsewhere work too: drop one mp3 per line in build/out/voice as
 The key comes from ELEVENLABS_API_KEY (or --key). Pick a voice with
 --list-voices; the model defaults to one that speaks Hebrew, override with
 --model. eleven_multilingual_v2 does NOT speak Hebrew — it reads the text
-as Latin transliteration.
+as Latin transliteration, and eleven_flash_v2_5 refuses Hebrew outright.
+Every line is sent with language_code=he (--language) and read at
+stability 0.8 (--stability); steadier than that goes flat, looser wanders.
 """
 import json, os, subprocess, sys, shutil, urllib.request, urllib.error
 
@@ -38,6 +40,9 @@ KEY = (sys.argv[sys.argv.index('--key') + 1] if '--key' in sys.argv
 VOICE = sys.argv[sys.argv.index('--voice') + 1] if '--voice' in sys.argv else ''
 MODEL = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv \
     else 'eleven_v3'          # multilingual_v2 transliterates Hebrew, it does not speak it
+LANG = sys.argv[sys.argv.index('--language') + 1] if '--language' in sys.argv else 'he'
+STABILITY = float(sys.argv[sys.argv.index('--stability') + 1]) \
+    if '--stability' in sys.argv else 0.8
 FFMPEG = (shutil.which('ffmpeg')
           or subprocess.run([sys.executable, '-c',
                              'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],
@@ -79,10 +84,12 @@ def synth(rows):
         dest = os.path.join(VOICE_DIR, f'{i+1:02d}.mp3')
         say = spoken(r['text'])
         pointed += say != r['text']
+        # v3 takes stability alone: it ignores similarity_boost, style and speed.
+        # language_code is what tells the engine to read the points as Hebrew.
         body = json.dumps({'text': say, 'model_id': MODEL,
-                           'voice_settings': {'stability': 0.5,
-                                              'similarity_boost': 0.75,
-                                              'speed': 1.0}}).encode()
+                           'language_code': LANG,
+                           'apply_text_normalization': 'auto',
+                           'voice_settings': {'stability': STABILITY}}).encode()
         open(dest, 'wb').write(
             call(f'/text-to-speech/{VOICE}', body,
                  {'Content-Type': 'application/json', 'Accept': 'audio/mpeg'}))
