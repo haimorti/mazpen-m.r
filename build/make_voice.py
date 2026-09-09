@@ -20,8 +20,9 @@ The key comes from ELEVENLABS_API_KEY (or --key). Pick a voice with
 --list-voices; the model defaults to one that speaks Hebrew, override with
 --model. eleven_multilingual_v2 does NOT speak Hebrew — it reads the text
 as Latin transliteration, and eleven_flash_v2_5 refuses Hebrew outright.
-Every line is sent with language_code=he (--language) and read at
-stability 0.8 (--stability); steadier than that goes flat, looser wanders.
+Every line is sent with language_code=he (--language), read at the
+Creative setting (--stability 0.0) and written as mp3 44.1kHz 128kbps
+(--format) — the settings the web app calls Language Override: Hebrew.
 """
 import json, os, subprocess, sys, shutil, urllib.request, urllib.error
 
@@ -41,8 +42,11 @@ VOICE = sys.argv[sys.argv.index('--voice') + 1] if '--voice' in sys.argv else ''
 MODEL = sys.argv[sys.argv.index('--model') + 1] if '--model' in sys.argv \
     else 'eleven_v3'          # multilingual_v2 transliterates Hebrew, it does not speak it
 LANG = sys.argv[sys.argv.index('--language') + 1] if '--language' in sys.argv else 'he'
+# v3 offers three settings, not a dial: 0.0 Creative, 0.5 Natural, 1.0 Robust.
 STABILITY = float(sys.argv[sys.argv.index('--stability') + 1]) \
-    if '--stability' in sys.argv else 0.8
+    if '--stability' in sys.argv else 0.0
+OUTFMT = sys.argv[sys.argv.index('--format') + 1] if '--format' in sys.argv \
+    else 'mp3_44100_128'
 FFMPEG = (shutil.which('ffmpeg')
           or subprocess.run([sys.executable, '-c',
                              'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],
@@ -91,7 +95,7 @@ def synth(rows):
                            'apply_text_normalization': 'auto',
                            'voice_settings': {'stability': STABILITY}}).encode()
         open(dest, 'wb').write(
-            call(f'/text-to-speech/{VOICE}', body,
+            call(f'/text-to-speech/{VOICE}?output_format={OUTFMT}', body,
                  {'Content-Type': 'application/json', 'Accept': 'audio/mpeg'}))
         try:                                   # ffmpeg is only needed to fit, not to speak
             got = f'{audio_seconds(dest):5.1f}s'
