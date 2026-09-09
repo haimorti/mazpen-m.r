@@ -130,9 +130,13 @@ def fit(rows, secs, pad=0.5):
     for i, s in enumerate(scenes):
         frames = [need[(i, j)] for j in range(len(narration.lines_for(s)))]
         if s['type'] == 'walk':
-            for st, d in zip(s['steps'], frames):
+            spoken = [st for st in s['steps'] if not st.get('silent')]
+            for st, d in zip(spoken, frames):
+                scale = d / st['dur']
+                for w in st.get('cursor', []):
+                    w['t'] = round(w['t'] * scale, 2)
                 st['dur'] = d
-            s['dur'] = sum(frames)
+            s['dur'] = round(sum(st['dur'] for st in s['steps']), 1)
         elif s['type'] == 'fork':
             for fr, d in zip(s['frames'], frames):
                 scale = d / fr['dur']

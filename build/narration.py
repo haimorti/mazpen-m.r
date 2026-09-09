@@ -36,7 +36,9 @@ def lines_for(s):
             out.append((say(s['outro'], 'cap'), s['outro']['dur']))
         return out
     if t == 'walk':
-        return [(say(st, 'cap'), st['dur']) for st in s['steps']]
+        # a `silent` step holds the picture for a beat -- letting the whole page
+        # be seen before the spotlight closes in -- and carries no line
+        return [(say(st, 'cap'), st['dur']) for st in s['steps'] if not st.get('silent')]
     if t == 'fork':
         c0, c1 = s['cols']
         d = [f['dur'] for f in s['frames']]
@@ -50,17 +52,33 @@ def lines_for(s):
     return [(s.get('vo', ''), None)]
 
 
+def frames_for(s):
+    """Every frame of a scene with its length; text is None where nothing is said.
+
+    Only a walk has frames that hold the picture without a line, so everywhere
+    else this is lines_for itself."""
+    if s['type'] == 'walk':
+        return [(None if st.get('silent') else say(st, 'cap'), st['dur'])
+                for st in s['steps']]
+    return lines_for(s)
+
+
 def rows(scenes_file='scenes.json'):
     """Every narration entry in order, with its start time and its slot."""
     scenes = json.load(open(os.path.join(ROOT, 'build', scenes_file), encoding='utf-8'))
     out, t = [], 0.0
     for i, s in enumerate(scenes):
-        frames = lines_for(s)
-        at = t
-        for k, (text, dur) in enumerate(frames):
+        frames = frames_for(s)
+        spoken = sum(1 for text, _ in frames if text is not None)
+        at, k = t, 0
+        for text, dur in frames:
             d = s['dur'] if dur is None else dur
+            if text is None:                   # a held picture: it takes time, not a line
+                at += d
+                continue
+            k += 1
             est = len(text.split()) / WPS
-            out.append({'n': i + 1, 'sub': k + 1 if len(frames) > 1 else 0,
+            out.append({'n': i + 1, 'sub': k if spoken > 1 else 0,
                         'title': s.get('title', ''), 'at': at, 'dur': d, 'text': text,
                         'words': len(text.split()), 'est': est, 'tight': est > d - 0.3})
             at += d

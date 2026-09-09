@@ -465,9 +465,11 @@ def render(scene, total, step=None):
                            int((b['x'] + b['w']) * w), int((b['y'] + b['h']) * h)))
             if btn.width < 840:
                 btn = btn.resize((840, round(btn.height * 840 / btn.width)), Image.LANCZOS)
-            scr = load_shot(c['screen'])
-            sc_h = c.get('screen_keep', 1.0)
-            scr = scr.crop((0, 0, scr.width, int(scr.height * sc_h)))
+            scr = None
+            if c.get('screen'):
+                scr = load_shot(c['screen'])
+                sc_h = c.get('screen_keep', 1.0)
+                scr = scr.crop((0, 0, scr.width, int(scr.height * sc_h)))
             open_now = step >= c['opens_at']
             marked = scene['mark'][step] == side
             cols.append(
@@ -476,7 +478,8 @@ def render(scene, total, step=None):
                 f"<div class='fsaid'>{c['said']}</div>"
                 f"<div class='fdrop{' show' if open_now else ''}'>"
                 f"<div class='farrow'>&#8595;</div><div class='fdest'>{esc(c['dest'])}</div>"
-                f"<div class='fscr'><img src='{to_uri(scr)}' alt=''></div></div></div>")
+                + (f"<div class='fscr'><img src='{to_uri(scr)}' alt=''></div>"
+                   if c.get('screen') else '') + "</div></div>")
         body = (head + f"<div class='fhint'>{esc(scene['hint'])}</div>" + ''.join(cols))
     elif t == 'compare':
         rows = []
@@ -520,13 +523,14 @@ def render(scene, total, step=None):
             im = spotlight(im, st['focus'], dim=0.42, blur=6)
         sw, sh = fit(im, big)
         hl_div = marks(st)                 # a step may point at one box or at several
-        cap = esc(st['cap'])
+        cap = esc(st.get('cap', ''))       # a silent step holds the picture, uncaptioned
         if st.get('cap_title'):
             cap = f"<div class='ct'>{esc(st['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
         body = (head + f"<div class='stage{' tall' if big else ''}'><div class='frame'>"
                 f"<div class='shot' style='width:{sw}px'>"
                 f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
-                f"<div class='cap{' slim' if big else ''}'>{cap}</div>")
+                + (f"<div class='cap{' slim' if big else ''}'>{cap}</div>"
+                   if st.get('cap') else ''))
     elif t == 'statuslist':
         im = shot_im(scene)
         phase = scene.get('_phase', 'cards')
@@ -635,7 +639,9 @@ for idx, s in enumerate(scenes):
         for k, st in enumerate(s['steps']):
             s['_step'] = k
             fp = render(s, total, step=k)
-            frames.append((fp, st['dur'], None))
+            frames.append((fp, st['dur'],
+                           cursor_track(s, st['cursor'], big=bool(s.get('big')))
+                           if st.get('cursor') else None))
         p = fp
     elif s['type'] == 'fork':
         for k, fr in enumerate(s['frames']):
