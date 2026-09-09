@@ -8,7 +8,8 @@ Shared by make_narration.py (the script a person reads) and make_voice.py
 import json, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WPS = 2.6                       # Hebrew words a second, read calmly
+WPS = 1.7                       # Hebrew words a second, measured off the recorded clips
+                                # (2.6 was a guess, and it was a third too fast)
 
 
 def say(d, key):
