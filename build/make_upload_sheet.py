@@ -108,17 +108,16 @@ segno.make(PORTAL, error='m').save(buf, kind='png', scale=12, border=2,
 QR = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
 
 STEPS = [
-    ('נכנסים ל"העלאת מסמכים"', 'באזור האישי, בתפריט <b>פעולות באתר</b>.'),
-    ('נושא', 'בוחרים <b>שיקום</b>.'),
-    ('קטגוריה', 'בוחרים <b>פניות</b>.'),
-    ('מסמך', 'בוחרים <b>פנייה</b>.'),
-    ('מצרפים את הקובץ', 'לוחצים <b>צרף קובץ</b>, או גוררים את הקובץ למסגרת.'),
-    ('שולחים', 'מוודאים שכל השדות המסומנים מלאים, ולוחצים <b>שלח מסמך</b>.'),
+    'באזור האישי, בתפריט <b>פעולות באתר</b>, בוחרים <b>העלאת מסמכים</b>.',
+    'בשדה <b>נושא</b> בוחרים <b>שיקום</b>.',
+    'בשדה <b>קטגוריה</b> בוחרים <b>פניות</b>.',
+    'בשדה <b>מסמך</b> בוחרים <b>פנייה</b>.',
+    'לוחצים <b>צרף קובץ</b>, או גוררים את הקובץ אל המסגרת.',
+    'מוודאים שכל השדות המסומנים מלאים, ולוחצים <b>שלח מסמך</b>.',
 ]
 
-steps_html = ''.join(
-    f"<li><span class='n'>{i}</span><span class='t'><b>{t}</b><span>{d}</span></span></li>"
-    for i, (t, d) in enumerate(STEPS, start=1))
+steps_html = ''.join(f"<li><span class='n'>{i}</span><span class='t'>{t}</span></li>"
+                     for i, t in enumerate(STEPS, start=1))
 
 doc = f"""<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><style>
 {FONT_CSS}
@@ -140,15 +139,13 @@ h1{{font-family:'Rubik';font-weight:700;color:#14477E;font-size:20pt;margin:0;li
   unicode-bidi:isolate;direction:ltr;display:inline-block}}
 .enter p{{margin:1.5mm 0 0;color:#4A5C70;font-size:10.5pt;line-height:1.4}}
 h2{{font-family:'Rubik';font-weight:700;color:#14477E;font-size:13pt;margin:4mm 0 2.5mm}}
-ol.steps{{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;
-  gap:2mm 7mm}}
-ol.steps li{{display:flex;gap:3mm;align-items:flex-start}}
+ol.steps{{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2.2mm}}
+ol.steps li{{display:flex;gap:3mm;align-items:center}}
 ol.steps .n{{flex:none;width:7mm;height:7mm;border-radius:50%;background:#14477E;color:#fff;
   font-family:'Rubik';font-weight:700;font-size:10pt;display:flex;align-items:center;
-  justify-content:center;margin-top:.4mm}}
-ol.steps .t{{display:flex;flex-direction:column;gap:.6mm;line-height:1.35}}
-ol.steps .t b{{font-size:11.5pt;color:#1E2C24}}
-ol.steps .t span{{font-size:10.5pt;color:#4A5C70}}
+  justify-content:center}}
+ol.steps .t{{font-size:11.5pt;line-height:1.4;color:#1E2C24}}
+ol.steps .t b{{color:#14477E}}
 figure{{margin:3.5mm 0 0}}
 figure img{{display:block;width:100%}}
 figcaption{{color:#7A8B7F;font-size:9.5pt;margin-top:1.2mm;text-align:center}}
@@ -195,8 +192,8 @@ footer{{margin-top:2.5mm;padding-top:0;color:#8FA396;font-size:9pt}}
 
 <div class="calm">
   <b>המסמך מגיע אלינו ישירות</b>
-  <p>אחרי השליחה מופיע אישור על המסך. המסמך נכנס לתיק שלכם ומגיע לטיפול —
-     אין צורך לשלוח אותו שוב בדרך נוספת, ואין צורך להתקשר כדי לוודא שהתקבל.</p>
+  <p>אחרי השליחה מופיע אישור על המסך. המסמך נכנס לתיק שלכם ומגיע לטיפול,
+     ואין צורך לשלוח אותו שוב בדרך נוספת.</p>
 </div>
 
 <footer>הביטוח הלאומי · אגף שיקום</footer>
