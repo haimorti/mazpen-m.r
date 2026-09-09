@@ -99,7 +99,7 @@ def numbered(name, marks, keep=1.0, scale=2):
 
 inv = json.load(open(os.path.join(ROOT, 'build', 'scenes-invoice.json'), encoding='utf-8'))
 upload = next(s for s in inv if s.get('img') == '33-upload-documents.png')
-SHOT = uri(numbered('33-upload-documents.png', upload['highlights'], keep=0.83))
+SHOT = uri(numbered('33-upload-documents.png', upload['highlights'], keep=0.86))
 LOGO = uri(load('logo-rehab-division.png'))
 
 buf = io.BytesIO()
@@ -135,16 +135,19 @@ h1{{font-family:'Rubik';font-weight:700;color:#14477E;font-size:20pt;margin:0;li
   padding:3mm 4.5mm;margin:3.5mm 0}}
 .enter img{{width:17mm;flex:none}}
 .enter .k{{font-family:'Rubik';font-weight:700;color:#2C7A5B;font-size:10pt;margin:0 0 1mm}}
-.enter .u{{font-family:'Rubik';font-weight:700;color:#14477E;font-size:14pt;
-  unicode-bidi:isolate;direction:ltr;display:inline-block}}
+.enter a.u{{font-family:'Rubik';font-weight:700;color:#14477E;font-size:14pt;
+  unicode-bidi:isolate;direction:ltr;display:inline-block;text-decoration:underline;
+  text-underline-offset:2px}}
 .enter p{{margin:1.5mm 0 0;color:#4A5C70;font-size:10.5pt;line-height:1.4}}
 h2{{font-family:'Rubik';font-weight:700;color:#14477E;font-size:13pt;margin:4mm 0 2.5mm}}
-ol.steps{{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2.2mm}}
-ol.steps li{{display:flex;gap:3mm;align-items:center}}
+ol.steps{{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:1fr 1fr;grid-template-rows:repeat(3, auto);
+  grid-auto-flow:column;gap:3mm 8mm}}
+ol.steps li{{display:flex;gap:3mm;align-items:flex-start}}
 ol.steps .n{{flex:none;width:7mm;height:7mm;border-radius:50%;background:#14477E;color:#fff;
   font-family:'Rubik';font-weight:700;font-size:10pt;display:flex;align-items:center;
-  justify-content:center}}
-ol.steps .t{{font-size:11.5pt;line-height:1.4;color:#1E2C24}}
+  justify-content:center;margin-top:.3mm}}
+ol.steps .t{{font-size:11pt;line-height:1.4;color:#1E2C24}}
 ol.steps .t b{{color:#14477E}}
 figure{{margin:3.5mm 0 0}}
 figure img{{display:block;width:100%}}
@@ -173,8 +176,9 @@ footer{{margin-top:2.5mm;padding-top:0;color:#8FA396;font-size:9pt}}
   <img src="{QR}" alt="קוד לסריקה">
   <div>
     <p class="k">האזור האישי באתר הביטוח הלאומי</p>
-    <span class="u">{PORTAL}</span>
-    <p>סורקים את הקוד בטלפון, או מקלידים את הכתובת בדפדפן ומתחברים לאזור האישי.</p>
+    <a class="u" href="{PORTAL}">{PORTAL}</a>
+    <p>סורקים את הקוד בטלפון, לוחצים על הקישור, או מקלידים את הכתובת בדפדפן —
+       ומתחברים לאזור האישי.</p>
   </div>
 </div>
 
