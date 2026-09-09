@@ -327,14 +327,10 @@
  },
  {
   "slide": "14.png",
-  "dur": 6.6
- },
- {
-  "slide": "15.png",
   "dur": 9.1
  },
  {
-  "slide": "16.png",
+  "slide": "15.png",
   "dur": 18.7,
   "motion": {
    "cursor": [
@@ -360,7 +356,7 @@
   }
  },
  {
-  "slide": "17.png",
+  "slide": "16.png",
   "dur": 11.6
  }
 ]

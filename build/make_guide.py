@@ -40,7 +40,7 @@ inv_walks = [s for s in inv if s['type'] == 'walk']
 by_img = {s['img']: s for s in scenes if s.get('img')}
 zone_frames = [s for s in scenes if s['type'] == 'zones' and s.get('active')]
 main_zones = zone_frames[0]
-statuses = next(s for s in scenes if s['type'] == 'statuslist')
+statuses = json.load(open(os.path.join(ROOT, 'build', 'statuses.json'), encoding='utf-8'))
 walk = next(s for s in scenes if s['type'] == 'walk')
 fork = next(s for s in scenes if s['type'] == 'fork')
 esc = html.escape
@@ -368,7 +368,7 @@ def general_html():
 
 <section>
   <h2><span class="num">5</span> דף ההטבה והסטטוסים</h2>
-  <p>{esc(statuses['intro']['cap'])}</p>
+  <p>{esc(statuses['intro'])}</p>
   {figure('03-benefit-page-statuses.png', keep=0.90, mzoom={'y': 0.48, 'h': 0.52},
           caption='דף ההטבה. בהטבה פעילה, "פרטים נוספים" פותח את התמונה המלאה.')}
   <table class="st">{st_rows}</table>

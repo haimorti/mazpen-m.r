@@ -519,16 +519,14 @@ def render(scene, total, step=None):
         if st.get('focus'):
             im = spotlight(im, st['focus'], dim=0.42, blur=6)
         sw, sh = fit(im, big)
-        hl = st.get('highlight')
-        hl_div = (f"<div class='hl' style='left:{hl['x']}%;top:{hl['y']}%;"
-                  f"width:{hl['w']}%;height:{hl['h']}%'></div>" if hl else '')
+        hl_div = marks(st)                 # a step may point at one box or at several
         cap = esc(st['cap'])
         if st.get('cap_title'):
             cap = f"<div class='ct'>{esc(st['cap_title'])}:</div><div class='bul'><span>{cap}</span></div>"
         body = (head + f"<div class='stage{' tall' if big else ''}'><div class='frame'>"
                 f"<div class='shot' style='width:{sw}px'>"
                 f"<img src='{to_uri(im)}' alt=''>{hl_div}</div></div></div>"
-                f"<div class='cap{' slim' if big else ''}'>{esc(st['cap'])}</div>")
+                f"<div class='cap{' slim' if big else ''}'>{cap}</div>")
     elif t == 'statuslist':
         im = shot_im(scene)
         phase = scene.get('_phase', 'cards')

@@ -39,11 +39,9 @@ duration 7.2
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/13.png'
 duration 6
 file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/14.png'
-duration 6.6
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/15.png'
 duration 9.1
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/16.png'
+file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/15.png'
 duration 18.7
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/17.png'
+file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/16.png'
 duration 11.6
-file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/17.png'
+file '/home/user/mazpen-m.r/build/out/scenes-invoice/slides/16.png'
