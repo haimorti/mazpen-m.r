@@ -13,6 +13,8 @@ appended. Runs in four steps, any of which can be repeated on its own:
   python3 build/make_voice.py --voice <id> --fit --rebuild    # ...and re-cut
   python3 build/make_voice.py --mux                           # lay the track down
 
+Only some lines need re-speaking? --only 3,10,21 leaves the rest untouched.
+
 Clips made elsewhere work too: drop one mp3 per line in build/out/voice as
 01.mp3 … NN.mp3 and run --fit --rebuild --mux; no key is needed for that.
 
@@ -47,6 +49,10 @@ STABILITY = float(sys.argv[sys.argv.index('--stability') + 1]) \
     if '--stability' in sys.argv else 0.0
 OUTFMT = sys.argv[sys.argv.index('--format') + 1] if '--format' in sys.argv \
     else 'mp3_44100_128'
+# --only 3,10,21 re-speaks just those lines and leaves every other clip alone,
+# so a frame already fitted to its clip keeps the clip it was fitted to.
+ONLY = {int(n) for n in sys.argv[sys.argv.index('--only') + 1].split(',')} \
+    if '--only' in sys.argv else set()
 FFMPEG = (shutil.which('ffmpeg')
           or subprocess.run([sys.executable, '-c',
                              'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())'],
@@ -83,8 +89,11 @@ def spoken(text):
 
 def synth(rows):
     os.makedirs(VOICE_DIR, exist_ok=True)
-    pointed = 0
+    pointed = said = 0
     for i, r in enumerate(rows):
+        if ONLY and i + 1 not in ONLY:
+            continue
+        said += 1
         dest = os.path.join(VOICE_DIR, f'{i+1:02d}.mp3')
         say = spoken(r['text'])
         pointed += say != r['text']
@@ -102,7 +111,7 @@ def synth(rows):
         except Exception:
             got = '    ?'
         print(f'  {i+1:02d}  {got} / {r["dur"]:4}s  {r["text"][:52]}')
-    print(f'  {pointed} / {len(rows)} lines were sent with niqqud')
+    print(f'  {pointed} / {said} lines were sent with niqqud')
 
 
 def measured(rows):
